@@ -18,6 +18,7 @@ parameters:
     # A secret key that's used to generate certain security-related tokens
     secret:            ThisTokenIsNotSoSecretChangeIt
 
-    jira_oauth_customer_key:
-    jira_oauth_pem_path:
-    jira_url:
+    jira_oauth_customer_key: null
+    jira_oauth_pem_path: null
+    jira_url: null
+    jira_default_board: null

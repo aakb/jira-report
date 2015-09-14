@@ -1,5 +1,6 @@
+<h1>Sprints</h1>
 <ul>
-  {% for board in boards %}
-    <li>{{ board.name }}</li>
+  {% for sprint in sprints %}
+    <li><a href="/board/{{ id }}/sprint/{{ sprint.id }}">{{ sprint.name }}</a></li>
   {% endfor %}
 </ul>
