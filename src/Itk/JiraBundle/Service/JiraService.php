@@ -46,7 +46,7 @@ class JiraService extends ContainerAware {
         return json_decode($body);
       }
     } catch (RequestException $e) {
-      die('DefaultController.php');
+        throw $e;
     }
   }
 }

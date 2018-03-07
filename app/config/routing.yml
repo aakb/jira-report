@@ -9,6 +9,7 @@ hwi_oauth_login:
 itk_jira:
     resource: "@ItkJiraBundle/Controller/"
     type:     annotation
+    prefix:   /main
 
 jira_login:
     path: /login/check-jira
