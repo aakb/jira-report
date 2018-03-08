@@ -1,0 +1,6 @@
+<h1>Sprints</h1>
+<ul>
+  {% for sprint in sprints %}
+    <li><a href="{{ path('board_sprint', {boardId:id, sprintId:sprint.id}) }}">{{ sprint.name }}</a></li>
+  {% endfor %}
+</ul>
