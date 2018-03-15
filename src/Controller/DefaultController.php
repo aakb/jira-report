@@ -13,8 +13,19 @@ class DefaultController extends Controller
    * @Route("/")
    * @Method("GET")
    */
-  public function indexAction() {
-    return $this->render('jira/index.html.twig', array('defaultBoard' => array('id' => 65, 'name' => 'Team Board')));
+  public function indexAction(JiraService $jira) {
+    $boardId = 65;
+    $activeSprint = $jira->get('/rest/agile/1.0/board/' . $boardId . '/sprint?state=active');
+
+    return $this->render('jira/index.html.twig', array(
+      'defaultBoard' => array(
+        'id' => $boardId,
+        'name' => 'Team Board'
+      ),
+        'activeSprint' => $activeSprint->values['0']->id,
+        'activeSprintName' => $activeSprint->values['0']->name,
+      )
+    );
   }
 
   /**
@@ -22,9 +33,13 @@ class DefaultController extends Controller
    * @Method("GET")
    */
   public function boardsAction(JiraService $jira) {
-    $body = $jira->get('/rest/agile/1.0/board');
+    $itemsPerPage = 50;
+    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    $startAt = ($page - 1) * $itemsPerPage;
+    $body = $jira->get('/rest/agile/1.0/board?startAt=' . $startAt . '&maxResults=' . $itemsPerPage);
+    $pager = $this->getPagerData($body, $page, $itemsPerPage);
 
-    return $this->render('jira/boards.html.twig', array('boards' => $body->values));
+    return $this->render('jira/boards.html.twig', array('values' => $body->values, 'pager' => $pager));
   }
 
   /**
@@ -32,9 +47,14 @@ class DefaultController extends Controller
    * @Method("GET")
    */
   public function boardAction($boardId, JiraService $jira) {
-    $body = $jira->get('/rest/agile/1.0/board/' . $boardId . '/sprint');
+    $itemsPerPage = 50;
+    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    $startAt = ($page - 1) * $itemsPerPage;
+    $body = $jira->get('/rest/agile/1.0/board/' . $boardId . '/sprint?state=future,active');
+    $closed = $jira->get('/rest/agile/1.0/board/' . $boardId . '/sprint?state=closed&startAt=' . $startAt . '&maxResults=' . $itemsPerPage);
+    $pager = $this->getPagerData($closed, $page, $itemsPerPage);
 
-    return $this->render('jira/board.html.twig', array('sprints' => $body->values, 'id' => $boardId));
+    return $this->render('jira/board.html.twig', array('sprints' => $body->values, 'id' => $boardId, 'pager' => $pager, 'closed' => $closed->values));
   }
 
   /**
@@ -78,5 +98,34 @@ class DefaultController extends Controller
       'boardId' => $boardId,
       'sprintId' => $sprintId
     ));
+  }
+
+  /**
+   * @Route("/planning/sprint/{boardId}", name="planning")
+   * @Method("GET")
+   */
+  public function planningDisplay($boardId, JiraService $jira) {
+    $sprints = $jira->get('/rest/agile/1.0/board/' . $boardId . '/sprint?state=future,active');
+    return $this->render('jira/planning.html.twig', array(
+      'data' => json_encode(array(
+        'sprints' => $sprints,
+      )),
+    ));
+  }
+
+  /**
+   *
+   */
+  public function getPagerData($body, $page, $itemsPerPage) {
+    $pager =[];
+
+    $pager['currentPage'] = $page;
+    $pager['lastPage'] = property_exists($body, 'total') ? (int)ceil($body->total / $itemsPerPage) : FALSE;
+    $pager['itemsPerPage'] = $itemsPerPage;
+    $pager['total'] = isset($pager['total']) ? $pager['total'] : FALSE;
+    $pager['maxResults'] = $itemsPerPage;
+    $pager['isLast'] = $body->isLast;
+
+    return $pager;
   }
 }

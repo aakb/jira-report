@@ -1,6 +1,11 @@
-<h1>Select with board to show sprints for</h1>
-<ul>
-  {% for board in boards %}
-    <li><a href="{{ path('board', {boardId:board.id}) }}">{{ board.name }}</a></li>
-  {% endfor %}
-</ul>
+{% extends 'base.html.twig' %}
+
+{% block body %}
+  <h1>Select which board to show sprints for</h1>
+  <ul>
+    {% for board in values %}
+      <li><a href="{{ path('board', {boardId:board.id}) }}">{{ board.name }}</a></li>
+    {% endfor %}
+    {% include 'jira/pager.html.twig' with {'pager' : pager} %}
+  </ul>
+{% endblock %}

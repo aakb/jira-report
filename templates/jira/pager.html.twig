@@ -1,0 +1,49 @@
+{% set currentPath = app.request.attributes.get('_route') %}
+<nav class="pager">
+  <ul class="pagination">
+    {# Check if we show all boards or a specific board #}
+    {% if(id is defined) %}
+      {# Don't show left aroows on first page #}
+      {% if (pager.currentPage != 1) %}
+        <li class="pager-item first"><a class="page-link" href="{{ path(app.request.attributes.get('_route'), {boardId:id, 'page': 1}) }}">First</a></li>
+        <li class="pager-item previous"><a class="page-link" href="{{ path(app.request.attributes.get('_route'), {boardId:id, 'page': pager.currentPage - 1}) }}">Previous</a></li>
+      {% endif %}
+      {# Display page no. #}
+      <li class="page-item active">
+        <span class="page-link">
+          {{ pager.currentPage }}
+          <span class="sr-only">(current)</span>
+        </span>
+      </li>
+      {# Check if we are on last page #}
+      {% if (not pager.isLast) %}
+        <li class="pager-item next"><a class="page-link" href="{{ path(app.request.attributes.get('_route'), {boardId:id, 'page': pager.currentPage + 1}) }}">Next</a></li>
+      {% endif %}
+      {# API Does not always provide a total #}
+      {% if (pager.total) %}
+        <li class="pager-item last"><a class="page-link" href="{{ path(app.request.attributes.get('_route'), {boardId:id, 'page': pager.lastPage}) }}">Last</a></li>
+      {% endif %}
+    {% else %}
+      {# Don't show left aroows on first page #}
+      {% if (pager.currentPage != 1) %}
+        <li class="pager-item first"><a class="page-link" href="{{ path(app.request.attributes.get('_route'), {'page': 1}) }}">First</a></li>
+        <li class="pager-item previous"><a class="page-link" href="{{ path(app.request.attributes.get('_route'), {'page': pager.currentPage - 1}) }}">Previous</a></li>
+      {% endif %}
+      {# Display page no. #}
+      <li class="page-item active">
+        <span class="page-link">
+          {{ pager.currentPage }}
+          <span class="sr-only">(current)</span>
+        </span>
+      </li>
+      {# Check if we are on last page #}
+      {% if (not pager.isLast) %}
+        <li class="pager-item next"><a class="page-link" href="{{ path(app.request.attributes.get('_route'), {'page': pager.currentPage + 1}) }}">Next</a></li>
+      {% endif %}
+      {# API Does not always provide a total #}
+      {% if (pager.total) %}
+        <li class="pager-item last"><a class="page-link" href="{{ path(app.request.attributes.get('_route'), {'page': pager.lastPage}) }}">Last</a></li>
+      {% endif %}
+    {% endif %}
+  </ul>
+</nav>

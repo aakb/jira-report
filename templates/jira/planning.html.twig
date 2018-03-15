@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+  <script src="https://unpkg.com/vue"></script>
+    <div id="app" data-app="{{ data }}">
+      {% verbatim %}
+        <table style="width:100%">
+        <tr>
+          <th>Name</th>
+          <th v-for="item in header">
+            {{ item.name }}
+          </th>
+        </tr>
+        <tr>
+        </tr>
+        </table>
+      {% endverbatim %}
+    </div>
+{% endblock %}

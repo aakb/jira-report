@@ -1,6 +1,44 @@
-<h1>Sprints</h1>
-<ul>
-  {% for sprint in sprints %}
-    <li><a href="{{ path('board_sprint', {boardId:id, sprintId:sprint.id}) }}">{{ sprint.name }}</a></li>
-  {% endfor %}
-</ul>
+{% extends 'base.html.twig' %}
+{% block body %}
+  <div id="accordion">
+    <div class="card">
+      <div class="card-header" id="headingOne">
+        <h5 class="mb-0">
+          <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+            Open sprints
+          </button>
+        </h5>
+      </div>
+
+      <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+        <div class="card-body">
+          <ul>
+            {% for sprint in sprints %}
+              <li><a href="{{ path('board_sprint', {boardId:id, sprintId:sprint.id}) }}">{{ sprint.name }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" id="headingTwo">
+        <h5 class="mb-0">
+          <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+            Closed sprints
+          </button>
+        </h5>
+      </div>
+      <div id="collapseTwo" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordion">
+        <div class="card-body">
+          <ul>
+            {% for sprint in closed %}
+              <li><a href="{{ path('board_sprint', {boardId:id, sprintId:sprint.id}) }}">{{ sprint.name }}</a></li>
+            {% endfor %}
+            {% include 'jira/pager.html.twig' with {'pager' : pager} %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

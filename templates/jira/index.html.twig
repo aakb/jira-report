@@ -1,8 +1,13 @@
-<h1>Jira reporting tool</h1>
+{% extends 'base.html.twig' %}
 
-<section>
-  <ul>
-    <li>Go to sprints for <a href="/board/{{ defaultBoard.id }}">{{ defaultBoard.name }}</a>.</li>
-    <li>Go to <a href="{{ path('boards') }}">all boards</a>.</li>
-  </ul>
-</section>
+{% block body %}
+  <h1>Jira reporting tool</h1>
+  {{ dump() }}
+  <section>
+    <ul>
+      <li>Go to sprints for <a href="/board/{{ defaultBoard.id }}">{{ defaultBoard.name }}</a>.</li>
+      <li>Go to <a href="{{ path('boards') }}">all boards</a>.</li>
+      <li>Go to <a href="{{ path('planning', {boardId:defaultBoard.id}) }}">planning ({{ activeSprintName }})</a>.</li>
+    </ul>
+  </section>
+{% endblock %}
