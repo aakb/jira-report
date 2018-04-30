@@ -14,14 +14,34 @@ var app = new Vue({
 });
 
 function getData(sprintData) {
-  console.log(sprintData);
+  var sessions = this;
   var output =[];
+  console.log(sessions);
+  var headers = {
+    headers: {'Access-Control-Allow-Origin': '*'}
+  };
+
   sprintData.sprints.values.forEach(function(element) {
-    axios.get(element.self)
+    console.log(element);
+    /*
+    axios.get(element.self, headers)
       .then(function(response){
-        console.log(response.data); // ex.: { user: 'Your User'}
-        console.log(response.status); // ex.: 200
+        //console.log(response.data); // ex.: { user: 'Your User'}
+        //console.log(response.status); // ex.: 200
+      })
+      .catch(function (error) {
+        if (error.response) {
+          console.log(error.response.headers);
+        }
+        else if (error.request) {
+          console.log(error.request);
+        }
+        else {
+          console.log(error.message);
+        }
+        console.log(error.config);
       });
+      */
   });
   return output;
 }
