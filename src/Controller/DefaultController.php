@@ -6,6 +6,8 @@ use App\Service\JiraService;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 
 class DefaultController extends Controller
 {
@@ -101,16 +103,27 @@ class DefaultController extends Controller
   }
 
   /**
-   * @Route("/planning/sprint/{boardId}", name="planning")
+   * @Route("/jira/{token}", name="jira", requirements={"token"=".+"})
    * @Method("GET")
    */
-  public function planningDisplay($boardId, JiraService $jira) {
-    $sprints = $jira->get('/rest/agile/1.0/board/' . $boardId . '/sprint?state=future,active');
-    return $this->render('jira/planning.html.twig', array(
-      'data' => json_encode(array(
-        'sprints' => $sprints,
-      )),
-    ));
+  public function jiraDisplay(JiraService $jira, Request $request, $token) {
+    return new JsonResponse($jira->get('/rest/agile/1.0/' . $token . "?" . $request->getQueryString()));
+  }
+
+  /**
+   * @Route("/planning", name="planning")
+   * @Method("GET")
+   */
+  public function planningDisplay(JiraService $jira) {
+    return $this->render('jira/planning.html.twig');
+  }
+
+  /**
+   * @Route("/project/{boardId}", name="project")
+   * @Method("GET")
+   */
+  public function projectDisplay(JiraService $jira, $boardId) {
+    return $this->render('jira/project.html.twig');
   }
 
   /**

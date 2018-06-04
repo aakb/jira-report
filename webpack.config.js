@@ -24,4 +24,6 @@ Encore
 
 ;
 
-module.exports = Encore.getWebpackConfig();
+var config = Encore.getWebpackConfig();
+config.watchOptions = { poll: true, ignored: /node_modules/ };
+module.exports = config;
