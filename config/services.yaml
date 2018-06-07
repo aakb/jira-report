@@ -36,3 +36,4 @@ services:
           $customer_key: '%env(JIRA_OAUTH_CUSTOMER_KEY)%'
           $pem_path: '%env(JIRA_OAUTH_PEM_PATH)%'
           $jira_url: '%env(JIRA_URL)%'
+

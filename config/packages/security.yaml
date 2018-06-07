@@ -12,7 +12,6 @@ security:
                 login_path:        /login
                 use_forward:       false
                 failure_path:      /login
-
                 oauth_user_provider:
                     service: hwi_oauth.user.provider
 

@@ -1,0 +1,6 @@
+<div>{{ project.name }} ({{ project.key }})</div>
+{% for version in project.versions %}
+<a href="/sprint_report/version/{{ version.id }}"><div>{{ version.id }}: {{ version.name }}</div></a>
+{% endfor %}
+
+{{ dump() }}

@@ -1,0 +1,5 @@
+{% for project in projects %}
+  <a href="sprint_report/project/{{ project.id }}"><div>{{ project.id }}: {{ project.name }} ({{ project.key }})</div></a>
+{% endfor %}
+
+{{ dump() }}
