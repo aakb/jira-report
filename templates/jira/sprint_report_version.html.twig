@@ -34,4 +34,26 @@
   <strong>Færdiggørelsesgrad (%): </strong><input type="number" id="input-finished-degree" max="100" min="0">
 </div>
 
-{{ dump() }}
+<div>
+  <h3>Projektets faser:</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>EPIC</th>
+        <th>Est.</th>
+        <th>Resterende arbejde est.</th>
+        <th>Registreret</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for epic in epics %}
+        <tr>
+          <td>{{ epic.name }}</td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

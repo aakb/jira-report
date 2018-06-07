@@ -56,16 +56,44 @@ class DefaultController extends Controller
             $version = $jira->get('/rest/api/2/version/' . $vid);
             $project = $jira->get('/rest/api/2/project/' . $version->projectId);
 
+            $customFields = $jira->get('/rest/api/2/field');
+
+            // Find customField definitions.
+            $customFieldEpicLink = array_search('Epic Link', array_column($customFields, 'name'));
+            if ($customFieldEpicLink == FALSE) {
+                throw new HttpException(500, 'Epic Link custom field does not exist');
+            }
+
+            $customFieldSprint = array_search('Sprint', array_column($customFields, 'name'));
+            if ($customFieldSprint == FALSE) {
+                throw new HttpException(500, 'Sprint custom field does not exist');
+            }
+
+            $customFieldEpicLink = $customFields[$customFieldEpicLink];
+            $customFieldSprint = $customFields[$customFieldSprint];
+
             // Get all issues for version.
             $issues = [];
             $startAt = 0;
+            $fields = implode(',', [
+                'timetracking',
+                'worklog',
+                'timespent',
+                'timeoriginalestimate',
+                'summary',
+                'assignee',
+                'status',
+                'resolutionDate',
+                $customFieldEpicLink->id,
+                $customFieldSprint->id,
+            ]);
             while (true) {
                 $results = $jira->get(
                     '/rest/api/2/search' .
                     '?jql=fixVersion=' . $vid .
                     '&project=' . $version->projectId .
                     '&maxResults=50' .
-                    '&fields=timetracking,worklog,timespent,timeoriginalestimate,summary,assignee,status,resolutionDate,customfield_10006' .
+                    '&fields=' . $fields .
                     '&startAt=' . $startAt);
                 $issues = array_merge($issues, $results->issues);
 
@@ -76,10 +104,13 @@ class DefaultController extends Controller
                 }
             }
 
+            $epics = [];
+
+            // Extract sprint and epics from agile custom field.
             foreach ($issues as $issue) {
                 $issue->sprints = [];
 
-                foreach($issue->fields->customfield_10006 as $sprintString) {
+                foreach($issue->fields->{$customFieldSprint->key} as $sprintString) {
                     $replace = preg_replace(['/.*\[/', '/].*/'], '', $sprintString);
                     $fields = explode(',', $replace);
 
@@ -91,6 +122,13 @@ class DefaultController extends Controller
                     }
 
                     $issue->sprints[] = (object)$sprint;
+                }
+
+                if (isset($issue->fields->{$customFieldEpicLink->key})) {
+                    if (!isset($epics[$issue->fields->{$customFieldEpicLink->key}])) {
+                        $epics[$issue->fields->{$customFieldEpicLink->key}] = $jira->get('rest/agile/1.0/epic/' . $issue->fields->{$customFieldEpicLink->key});
+                    }
+                    $issue->epic = $epics[$issue->fields->{$customFieldEpicLink->key}];
                 }
             }
 
@@ -113,6 +151,7 @@ class DefaultController extends Controller
                 }
             }
 
+            // Calculate spent and remaining.
             $spentSum = 0;
             $remainingSum = 0;
             foreach ($issues as $issue) {
@@ -122,8 +161,11 @@ class DefaultController extends Controller
                     $remainingSum = $remainingSum + $issue->fields->timetracking->remainingEstimateSeconds;
                 }
             }
-            $spentHours = $spentSum / 60 / 60;
-            $remainingHours = $remainingSum / 60 / 60;
+            $spentHours = $spentSum / 3600;
+            $remainingHours = $remainingSum / 3600;
+
+
+
 
             return $this->render('jira/sprint_report_version.html.twig', array(
                     'version' => $version,
@@ -134,6 +176,7 @@ class DefaultController extends Controller
                     'spentSum' => $spentSum,
                     'spentHours' => $spentHours,
                     'remainingHours' => $remainingHours,
+                    'epics' => $epics,
                 )
             );
         }
