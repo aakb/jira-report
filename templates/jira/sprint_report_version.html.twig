@@ -1,83 +1,90 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-  <div>
-    <strong>Projekt: </strong><span>{{ project.name }}</span>
-  </div>
-  <div>
-    <strong>Bestilling: </strong>
-    <span>{{ version.name }}</span>
-  </div>
-  {% if version.description is defined %}
-    <div>
-      <strong>Beskrivelse: </strong>
-      <p>{{ version.description }}</p>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col list-group">
+        <div class="list-group-item">
+          <h1>Sprintrapport</h1>
+        </div>
+        <div class="list-group-item">
+          <h3>Overblik:</h3>
+          <table class="table">
+            <tbody>
+            <tr>
+              <td><strong>Projekt: </strong></td>
+              <td>{{ project.name }}</td>
+            </tr>
+            <tr>
+              <td><strong>Bestilling: </strong></td>
+              <td>{{ version.name }}</td>
+            </tr>
+            <tr>
+              <td><strong>Salgsbudget: </strong></td>
+              <td><input type="number" id="input-budget"
+                         style="width: 200px; border: 0"></td>
+            </tr>
+            <tr>
+              <td><strong>Timer reg. total: </strong></td>
+              <td>
+                <span id="time_spent">{{ spentHours }}</span>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Resterende timer planlagt total: </strong></td>
+              <td id="remaining_hours">
+                {{ remainingHours }}
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Projektets timer: </strong></td>
+              <td id="project_hours">
+                {{ spentHours + remainingHours }}
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Færdiggørelsesgrad (%): </strong></td>
+              <td><input type="number"
+                         id="input_finished_degree"
+                         max="100" min="0" style="width: 200px; border: 0;">
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Project total forecast: </strong></td>
+              <td><span id="project_total_forecast"></span></td>
+            </tr>
+            <tr>
+              <td><strong>Over/underløb - index: </strong></td>
+              <td><span id="over_under_index"></span></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="list-group-item">
+          <h3>Projektets faser:</h3>
+          <table class="table">
+            <thead>
+            <tr>
+              <th>EPIC</th>
+              <th>Est.</th>
+              <th>Resterende arbejde est.</th>
+              <th>Registreret</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for epic in epics %}
+              <tr>
+                <td>{{ epic.name }}</td>
+                <td>{{ epic.originalEstimateSum / 60 / 60 }}</td>
+                <td>{{ epic.remainingSum / 60 / 60 }}</td>
+                <td>{{ epic.spentSum / 60 / 60 }}</td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-  {% endif %}
-
-  <div>
-    <strong>Salgsbudget: </strong><input type="number" id="input-budget">
-  </div>
-  <div>
-    <div>
-      <strong>Timer reg. total: </strong>
-      <span id="time_spent">
-        {{ spentHours }}
-      </span>
-    </div>
-
-    <div>
-      <strong>Resterende timer planlagt total: </strong>
-      <span id="remaining_hours">
-        {{ remainingHours }}
-      </span>
-    </div>
-
-    <div>
-      <strong>Projektets timer: </strong>
-      <span id="project_hours">
-        {{ spentHours + remainingHours }}
-      </span>
-    </div>
-  </div>
-  <div>
-    <strong>Færdiggørelsesgrad (%): </strong>
-    <input type="number"
-           id="input_finished_degree"
-           max="100" min="0">
-  </div>
-  <div>
-    <strong>Project total forecast: </strong>
-    <span id="project_total_forecast"></span>
-  </div>
-  <div>
-    <strong>Over/underløb - index: </strong>
-    <span id="over_under_index"></span>
-  </div>
-
-
-  <div>
-    <h3>Projektets faser:</h3>
-    <table class="table" style="max-width: 800px;">
-      <thead>
-      <tr>
-        <th>EPIC</th>
-        <th>Est.</th>
-        <th>Resterende arbejde est.</th>
-        <th>Registreret</th>
-      </tr>
-      </thead>
-      <tbody>
-      {% for epic in epics %}
-        <tr>
-          <td>{{ epic.name }}</td>
-          <td>{{ epic.originalEstimateSum / 60 / 60 }}</td>
-          <td>{{ epic.remainingSum / 60 / 60 }}</td>
-          <td>{{ epic.spentSum / 60 / 60 }}</td>
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
   </div>
 {% endblock %}
 
@@ -85,8 +92,8 @@
   {{ parent() }}
 
   <script type="text/javascript">
-      (function() {
-          function updateNumbers (){
+      (function () {
+          function updateNumbers () {
               var remainingHours = parseFloat(document.querySelector('#remaining_hours').innerHTML);
               var finishedDegree = parseFloat(document.querySelector('#input_finished_degree').value);
               var sales_budget = parseFloat(document.querySelector('#input-budget').value);
@@ -97,18 +104,20 @@
               if (finishedDegree > 0) {
                   forecast = remainingHours / finishedDegree * 100;
 
-                  document.querySelector('#project_total_forecast').innerHTML = "" + forecast.toFixed(2);
+                  document.querySelector('#project_total_forecast').innerHTML = '' + forecast.toFixed(2);
               }
 
               if (sales_budget > 0 && forecast != null) {
                   over_under = forecast / sales_budget;
 
-                  document.querySelector('#over_under_index').innerHTML = "" + over_under.toFixed(2);
+                  document.querySelector('#over_under_index').innerHTML = '' + over_under.toFixed(2);
               }
           }
 
-          document.querySelector('#input_finished_degree').addEventListener('blur', updateNumbers);
-          document.querySelector('#input-budget').addEventListener('blur', updateNumbers);
+          document.querySelector('#input_finished_degree')
+              .addEventListener('blur', updateNumbers);
+          document.querySelector('#input-budget')
+              .addEventListener('blur', updateNumbers);
       })();
   </script>
 {% endblock %}
