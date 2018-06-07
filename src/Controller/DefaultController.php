@@ -63,13 +63,12 @@ class DefaultController extends Controller
             if ($customFieldEpicLink == FALSE) {
                 throw new HttpException(500, 'Epic Link custom field does not exist');
             }
+            $customFieldEpicLink = $customFields[$customFieldEpicLink];
 
             $customFieldSprint = array_search('Sprint', array_column($customFields, 'name'));
             if ($customFieldSprint == FALSE) {
                 throw new HttpException(500, 'Sprint custom field does not exist');
             }
-
-            $customFieldEpicLink = $customFields[$customFieldEpicLink];
             $customFieldSprint = $customFields[$customFieldSprint];
 
             // Get all issues for version.
@@ -87,6 +86,7 @@ class DefaultController extends Controller
                 $customFieldEpicLink->id,
                 $customFieldSprint->id,
             ]);
+
             while (true) {
                 $results = $jira->get(
                     '/rest/api/2/search' .
@@ -105,6 +105,10 @@ class DefaultController extends Controller
             }
 
             $epics = [];
+            $epics['NoEpic'] = (object)[
+                'id' => NULL,
+                'name' => 'No epic'
+            ];
 
             // Extract sprint and epics from agile custom field.
             foreach ($issues as $issue) {
@@ -151,21 +155,46 @@ class DefaultController extends Controller
                 }
             }
 
+            foreach ($epics as $epic) {
+                $epic->spentSum = 0;
+                $epic->remainingSum = 0;
+                $epic->originalEstimateSum = 0;
+            }
+
             // Calculate spent and remaining.
             $spentSum = 0;
             $remainingSum = 0;
             foreach ($issues as $issue) {
                 $spentSum = $spentSum + $issue->fields->timespent;
+                if (isset($issue->epic)) {
+                    $issue->epic->spentSum = $issue->epic->spentSum + $issue->fields->timespent;
+                }
+                else {
+                    $epics['NoEpic']->spentSum = $epics['NoEpic']->spentSum + $issue->fields->timespent;
+                }
 
                 if (!$issue->fields->status->name != 'Done' && isset($issue->fields->timetracking->remainingEstimateSeconds)) {
                     $remainingSum = $remainingSum + $issue->fields->timetracking->remainingEstimateSeconds;
+
+                    if (isset($issue->epic)) {
+                        $issue->epic->remainingSum = $issue->epic->remainingSum + $issue->fields->timetracking->remainingEstimateSeconds;
+                    }
+                    else {
+                        $epics['NoEpic']->remainingSum = $epics['NoEpic']->remainingSum + $issue->fields->timetracking->remainingEstimateSeconds;
+                    }
+                }
+
+                if (isset($issue->fields->timeoriginalestimate)) {
+                    if (isset($issue->epic)) {
+                        $issue->epic->originalEstimateSum = $issue->epic->originalEstimateSum + $issue->fields->timeoriginalestimate;
+                    }
+                    else {
+                        $epics['NoEpic']->originalEstimateSum = $epics['NoEpic']->originalEstimateSum + $issue->fields->timeoriginalestimate;
+                    }
                 }
             }
             $spentHours = $spentSum / 3600;
             $remainingHours = $remainingSum / 3600;
-
-
-
 
             return $this->render('jira/sprint_report_version.html.twig', array(
                     'version' => $version,
