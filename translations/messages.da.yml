@@ -1,0 +1,13 @@
+login:
+    jira: Giv adgang til Jira
+    heading: Jirarapporter
+index:
+    heading: Jirarapporter
+    menu:
+        sprint_reports: Sprintrapporter
+sprint_reports:
+    heading: Sprintrapporter
+    list:
+        help: Vælg projekt
+    list_version:
+        help: Vælg version

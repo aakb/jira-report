@@ -32,6 +32,13 @@
         {{ remainingHours }}
       </span>
     </div>
+
+    <div>
+      <strong>Projektets timer: </strong>
+      <span id="project_hours">
+        {{ spentHours + remainingHours }}
+      </span>
+    </div>
   </div>
   <div>
     <strong>Færdiggørelsesgrad (%): </strong>
@@ -43,10 +50,15 @@
     <strong>Project total forecast: </strong>
     <span id="project_total_forecast"></span>
   </div>
+  <div>
+    <strong>Over/underløb - index: </strong>
+    <span id="over_under_index"></span>
+  </div>
+
 
   <div>
     <h3>Projektets faser:</h3>
-    <table class="table">
+    <table class="table" style="max-width: 800px;">
       <thead>
       <tr>
         <th>EPIC</th>
@@ -67,9 +79,6 @@
       </tbody>
     </table>
   </div>
-
-  {{ dump(issues[39]) }}
-  {{ dump(epics) }}
 {% endblock %}
 
 {% block javascripts %}
@@ -77,15 +86,29 @@
 
   <script type="text/javascript">
       (function() {
-          document.querySelector('#input_finished_degree').addEventListener('blur',function(){
+          function updateNumbers (){
               var remainingHours = parseFloat(document.querySelector('#remaining_hours').innerHTML);
               var finishedDegree = parseFloat(document.querySelector('#input_finished_degree').value);
-              var forecast = remainingHours / finishedDegree * 100;
+              var sales_budget = parseFloat(document.querySelector('#input-budget').value);
 
-              console.log(remainingHours, finishedDegree, forecast);
+              var forecast = null;
+              var over_under = null;
 
-              document.querySelector('#project_total_forecast').innerHTML = "" + forecast.toFixed(2);
-          });
+              if (finishedDegree > 0) {
+                  forecast = remainingHours / finishedDegree * 100;
+
+                  document.querySelector('#project_total_forecast').innerHTML = "" + forecast.toFixed(2);
+              }
+
+              if (sales_budget > 0 && forecast != null) {
+                  over_under = forecast / sales_budget;
+
+                  document.querySelector('#over_under_index').innerHTML = "" + over_under.toFixed(2);
+              }
+          }
+
+          document.querySelector('#input_finished_degree').addEventListener('blur', updateNumbers);
+          document.querySelector('#input-budget').addEventListener('blur', updateNumbers);
       })();
   </script>
 {% endblock %}
