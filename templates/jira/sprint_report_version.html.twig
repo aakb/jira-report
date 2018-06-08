@@ -1,13 +1,11 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-  <div class="container-fluid">
+  <div class="container-fluid" style="margin: 2em">
+    <h1 style="margin-bottom: 1em">Sprintrapport</h1>
     <div class="row">
-      <div class="col list-group">
-        <div class="list-group-item">
-          <h1>Sprintrapport</h1>
-        </div>
-        <div class="list-group-item">
+      <div class="col">
+        <div>
           <h3>Overblik:</h3>
           <table class="table">
             <tbody>
@@ -27,7 +25,7 @@
             <tr>
               <td><strong>Timer reg. total: </strong></td>
               <td>
-                <span id="time_spent">{{ spentHours }}</span>
+                <span id="spent_hours">{{ spentHours }}</span>
               </td>
             </tr>
             <tr>
@@ -60,30 +58,135 @@
             </tbody>
           </table>
         </div>
-        <div class="list-group-item">
-          <h3>Projektets faser:</h3>
-          <table class="table">
-            <thead>
-            <tr>
-              <th>EPIC</th>
-              <th>Est.</th>
-              <th>Resterende arbejde est.</th>
-              <th>Registreret</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for epic in epics %}
-              <tr>
-                <td>{{ epic.name }}</td>
-                <td>{{ epic.originalEstimateSum / 60 / 60 }}</td>
-                <td>{{ epic.remainingSum / 60 / 60 }}</td>
-                <td>{{ epic.spentSum / 60 / 60 }}</td>
-              </tr>
-            {% endfor %}
-            </tbody>
-          </table>
-        </div>
       </div>
+    </div>
+    <div>
+      <h3>Projektets faser:</h3>
+      <table class="table">
+        <thead>
+        <tr>
+          <th>EPIC</th>
+          <th>Est.</th>
+          <th>Resterende arbejde est.</th>
+          <th>Registreret</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for epic in epics %}
+          <tr>
+            <td>{{ epic.name }}</td>
+            <td>{{ epic.originalEstimateSum / 60 / 60 }}</td>
+            <td>{{ epic.remainingSum / 60 / 60 }}</td>
+            <td>{{ epic.spentSum / 60 / 60 }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h3>Forbrugt pr. uge:</h3>
+      <table class="table">
+        <thead>
+        <tr>
+          <th>EPIC</th>
+          <th>Est.</th>
+          <th>Reg.</th>
+          <th>Ingen sprint</th>
+          {% for sprint in sprints|reverse %}
+            {% if sprint.state != 'FUTURE' %}
+              <th>{{ sprint.shortName }}</th>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for epic in epics %}
+          <tr>
+            <td>{{ epic.name }}</td>
+            <td>{{ epic.originalEstimateSum / 60 / 60 }}</td>
+            <td>{{ epic.spentSum / 60 / 60 }}</td>
+              <td>
+                {% if epic.worklogs is defined %}
+                  {% set loggedWork = 0 %}
+                  {% for key, worklogs in epic.worklogs %}
+                    {% if key == 'NoSprint' %}
+                      {% for worklog in worklogs %}
+                        {% set loggedWork = loggedWork + worklog.timeSpentSeconds %}
+                      {% endfor %}
+                    {% endif %}
+                  {% endfor %}
+                  {% if loggedWork > 0 %}
+                    {{ loggedWork / 60 / 60 }}
+                  {% endif %}
+                {% endif %}
+              </td>
+            {% for sprint in sprints|reverse %}
+              {% if sprint.state != 'FUTURE' %}
+                <td>
+                  {% if epic.worklogs is defined %}
+                    {% set loggedWork = 0 %}
+                    {% for key, worklogs in epic.worklogs %}
+                      {% if key == sprint.id %}
+                        {% for worklog in worklogs %}
+                          {% set loggedWork = loggedWork + worklog.timeSpentSeconds %}
+                        {% endfor %}
+                      {% endif %}
+                    {% endfor %}
+                    {% if loggedWork > 0 %}
+                      {{ loggedWork / 60 / 60 }}
+                    {% endif %}
+                  {% endif %}
+                </td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <h3>Planlagt pr. uge:</h3>
+      <table class="table">
+        <thead>
+        <tr>
+          <th>EPIC</th>
+          <th>Est.</th>
+          <th>Rest. arb.</th>
+          {% for sprint in sprints|reverse %}
+            {% if sprint.state == 'FUTURE' %}
+              <th>{{ sprint.shortName }}</th>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for epic in epics %}
+          <tr>
+            <td>{{ epic.name }}</td>
+            <td>{{ epic.originalEstimateSum / 60 / 60 }}</td>
+            <td>{{ epic.remainingSum / 60 / 60 }}</td>
+            {% for sprint in sprints|reverse %}
+              {% if sprint.state == 'FUTURE' %}
+                <td>
+                  {% set sprintRemainingSum = 0 %}
+                  {% for issue in issues %}
+                    {% if issue.epic.id == epic.id and issue.sprints|length %}
+                      {% if ((issue.sprints|last).id == sprint.id) %}
+                        {% set sprintRemainingSum = sprintRemainingSum + issue.fields.timetracking.remainingEstimateSeconds %}
+                      {% endif %}
+                    {% endif %}
+                  {% endfor %}
+                  {% if sprintRemainingSum > 0 %}
+                    {{ sprintRemainingSum / 60 / 60 }}
+                  {% endif %}
+                </td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
     </div>
   </div>
 {% endblock %}
@@ -94,7 +197,7 @@
   <script type="text/javascript">
       (function () {
           function updateNumbers () {
-              var remainingHours = parseFloat(document.querySelector('#remaining_hours').innerHTML);
+              var spentHours = parseFloat(document.querySelector('#spent_hours').innerHTML);
               var finishedDegree = parseFloat(document.querySelector('#input_finished_degree').value);
               var sales_budget = parseFloat(document.querySelector('#input-budget').value);
 
@@ -102,7 +205,7 @@
               var over_under = null;
 
               if (finishedDegree > 0) {
-                  forecast = remainingHours / finishedDegree * 100;
+                  forecast = spentHours / finishedDegree * 100;
 
                   document.querySelector('#project_total_forecast').innerHTML = '' + forecast.toFixed(2);
               }

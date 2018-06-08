@@ -70,9 +70,9 @@ class DefaultController extends Controller
     public function sprintReportVersionAction(JiraService $jira, $vid)
     {
         try {
+            // Get version, project, customFields from Jira.
             $version = $jira->get('/rest/api/2/version/'.$vid);
             $project = $jira->get('/rest/api/2/project/'.$version->projectId);
-
             $customFields = $jira->get('/rest/api/2/field');
 
             // Find customField definitions.
@@ -99,6 +99,15 @@ class DefaultController extends Controller
                 );
             }
             $customFieldSprint = $customFields[$customFieldSprint];
+
+            // Get active sprint.
+            $boardId = getenv('JIRA_DEFAULT_BOARD');
+            $activeSprint = $jira->get(
+                '/rest/agile/1.0/board/'.$boardId.'/sprint?state=active'
+            );
+            $activeSprint = count(
+                $activeSprint->values
+            ) > 0 ? $activeSprint->values[0] : null;
 
             // Get all issues for version.
             $issues = [];
@@ -141,12 +150,19 @@ class DefaultController extends Controller
             $epics['NoEpic'] = (object)[
                 'id' => null,
                 'name' => 'No epic',
+                'spentSum' => 0,
+                'remainingSum' => 0,
+                'originalEstimateSum' => 0,
             ];
+            $sprints = [];
+            $spentSum = 0;
+            $remainingSum = 0;
 
             // Extract sprint and epics from agile custom field.
             foreach ($issues as $issue) {
                 $issue->sprints = [];
 
+                // Get sprints for issue.
                 foreach ($issue->fields->{$customFieldSprint->key} as $sprintString) {
                     $replace = preg_replace(
                         ['/.*\[/', '/].*/'],
@@ -162,79 +178,79 @@ class DefaultController extends Controller
                         $sprint[$split[0]] = $split[1];
                     }
 
-                    $issue->sprints[] = (object)$sprint;
+                    // Set shortName
+                    $sprint['shortName'] = str_replace('Sprint ', '', $sprint['name']);
+
+                    $issue->sprints[] = (object) $sprint;
+
+                    if (!isset($sprints[$sprint['id']])) {
+                        $sprints[$sprint['id']] = (object) $sprint;
+                    }
                 }
 
+                // Get issue epic.
                 if (isset($issue->fields->{$customFieldEpicLink->key})) {
                     if (!isset($epics[$issue->fields->{$customFieldEpicLink->key}])) {
-                        $epics[$issue->fields->{$customFieldEpicLink->key}] = $jira->get(
+                        $epic = $epics[$issue->fields->{$customFieldEpicLink->key}] = $jira->get(
                             'rest/agile/1.0/epic/'.$issue->fields->{$customFieldEpicLink->key}
                         );
+
+                        $epic->spentSum = 0;
+                        $epic->remainingSum = 0;
+                        $epic->originalEstimateSum = 0;
                     }
                     $issue->epic = $epics[$issue->fields->{$customFieldEpicLink->key}];
                 }
-            }
-
-            // Get active sprint.
-            $boardId = 65;
-            $activeSprint = $jira->get(
-                '/rest/agile/1.0/board/'.$boardId.'/sprint?state=active'
-            );
-            $activeSprint = count(
-                $activeSprint->values
-            ) > 0 ? $activeSprint->values[0] : null;
-
-            // Get all sprints.
-            $allSprints = [];
-            $startAt = 0;
-            while (true) {
-                $results = $jira->get(
-                    '/rest/agile/1.0/board/'.$boardId.'/sprint?startAt='.$startAt
-                );
-                $allSprints = array_merge($allSprints, $results->values);
-
-                $startAt = $startAt + 50;
-
-                if ($results->isLast) {
-                    break;
+                else {
+                    $issue->epic = $epics['NoEpic'];
                 }
-            }
 
-            foreach ($epics as $epic) {
-                $epic->spentSum = 0;
-                $epic->remainingSum = 0;
-                $epic->originalEstimateSum = 0;
-            }
+                // Gather worklogs for sprints/epics.
+                if (!isset($issue->epic->worklogs)) {
+                    $issue->epic->worklogs = [];
+                }
+                foreach ($issue->fields->worklog->worklogs as $worklog) {
+                    $this->started = date($worklog->started);
+                    $sprint = array_filter($sprints, function($k) {
+                        return
+                            $k->startDate < $this->started &&
+                            $k->endDate > $this->started;
+                    });
 
-            // Calculate spent and remaining.
-            $spentSum = 0;
-            $remainingSum = 0;
-            foreach ($issues as $issue) {
+                    if (!empty($sprint)) {
+                        $sprint = array_pop($sprint);
+
+                        if (!isset($issue->epic->worklogs[$sprint->id])) {
+                            $issue->epic->worklogs[$sprint->id] = [];
+                        }
+                        $issue->epic->worklogs[$sprint->id][] = $worklog;
+                    }
+                    else {
+                        if (!isset($issue->epic->worklogs['NoSprint'])) {
+                            $issue->epic->worklogs['NoSprint'] = [];
+                        }
+                        $issue->epic->worklogs['NoSprint'][] = $worklog;
+                    }
+                }
+
+                // Accumulate spentSum.
                 $spentSum = $spentSum + $issue->fields->timespent;
-                if (isset($issue->epic)) {
-                    $issue->epic->spentSum = $issue->epic->spentSum + $issue->fields->timespent;
-                } else {
-                    $epics['NoEpic']->spentSum = $epics['NoEpic']->spentSum + $issue->fields->timespent;
-                }
+                $issue->epic->spentSum = $issue->epic->spentSum + $issue->fields->timespent;
 
+                // Accumulate remainingSum.
                 if (!$issue->fields->status->name != 'Done' && isset($issue->fields->timetracking->remainingEstimateSeconds)) {
                     $remainingSum = $remainingSum + $issue->fields->timetracking->remainingEstimateSeconds;
 
-                    if (isset($issue->epic)) {
-                        $issue->epic->remainingSum = $issue->epic->remainingSum + $issue->fields->timetracking->remainingEstimateSeconds;
-                    } else {
-                        $epics['NoEpic']->remainingSum = $epics['NoEpic']->remainingSum + $issue->fields->timetracking->remainingEstimateSeconds;
-                    }
+                    $issue->epic->remainingSum = $issue->epic->remainingSum + $issue->fields->timetracking->remainingEstimateSeconds;
                 }
 
+                // Accumulate originalEstimateSum.
                 if (isset($issue->fields->timeoriginalestimate)) {
-                    if (isset($issue->epic)) {
-                        $issue->epic->originalEstimateSum = $issue->epic->originalEstimateSum + $issue->fields->timeoriginalestimate;
-                    } else {
-                        $epics['NoEpic']->originalEstimateSum = $epics['NoEpic']->originalEstimateSum + $issue->fields->timeoriginalestimate;
-                    }
+                    $issue->epic->originalEstimateSum = $issue->epic->originalEstimateSum + $issue->fields->timeoriginalestimate;
                 }
             }
+
+            // Calculate spent, remaining hours.
             $spentHours = $spentSum / 3600;
             $remainingHours = $remainingSum / 3600;
 
@@ -245,7 +261,7 @@ class DefaultController extends Controller
                     'project' => $project,
                     'issues' => $issues,
                     'activeSprint' => $activeSprint,
-                    'allSprints' => $allSprints,
+                    'sprints' => $sprints,
                     'spentSum' => $spentSum,
                     'spentHours' => $spentHours,
                     'remainingHours' => $remainingHours,
