@@ -11,3 +11,27 @@ sprint_reports:
         help: Vælg projekt
     list_version:
         help: Vælg version
+sprint_report_version:
+    heading: Sprintrapport
+    heading_overview: Overblik
+    heading_phases: Projektets faser
+    heading_spent_hours: Forbrugt pr. uge
+    heading_planned_hours: Planlagt pr. uge
+    sub:
+        project: Projekt
+        version: Bestilling
+        budget: Salgsbudget
+        spent_hours: Timer reg. total
+        remaining_hours: Resterende timer planlagt total
+        project_hours: Projektets timer
+        finished_degree: Færdiggørelsesgrad (%)
+        project_forecast: Projekt total forecast
+        over_under_index: Over/underløb - index
+    table:
+        epic: Epic
+        estimate: Est.
+        remaining_hours: Resterende arbejde est.
+        remaining_hours_short: Rest. arb.
+        registered_hours: Registreret
+        reg: Reg.
+        no_sprint: Ingen sprint

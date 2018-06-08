@@ -250,6 +250,15 @@ class DefaultController extends Controller
                 }
             }
 
+            $epicSprintOverview = [];
+            foreach ($epics as $key => $epic) {
+                $epicSprintOverview[$key] = [];
+            }
+
+            foreach ($issues as $issue) {
+
+            }
+
             // Calculate spent, remaining hours.
             $spentHours = $spentSum / 3600;
             $remainingHours = $remainingSum / 3600;
@@ -266,6 +275,7 @@ class DefaultController extends Controller
                     'spentHours' => $spentHours,
                     'remainingHours' => $remainingHours,
                     'epics' => $epics,
+                    'epicSprintOverview' => $epicSprintOverview,
                 ]
             );
         } catch (HttpException $e) {

@@ -1,58 +1,58 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-  <div class="container-fluid" style="margin: 2em">
-    <h1 style="margin-bottom: 1em">Sprintrapport</h1>
+  <div class="container-fluid" style="max-width: 1400px; margin: 2em auto;">
+    <h1 style="margin-bottom: 1em">{{ 'sprint_report_version.heading' | trans }}</h1>
     <div class="row">
       <div class="col">
         <div>
-          <h3>Overblik:</h3>
+          <h3>{{ 'sprint_report_version.heading_overview' | trans }}</h3>
           <table class="table">
             <tbody>
             <tr>
-              <td><strong>Projekt: </strong></td>
+              <td><strong>{{ 'sprint_report_version.sub.project' | trans }}: </strong></td>
               <td>{{ project.name }}</td>
             </tr>
             <tr>
-              <td><strong>Bestilling: </strong></td>
+              <td><strong>{{ 'sprint_report_version.sub.version' | trans }}: </strong></td>
               <td>{{ version.name }}</td>
             </tr>
             <tr>
-              <td><strong>Salgsbudget: </strong></td>
+              <td><strong>{{ 'sprint_report_version.sub.budget' | trans }}: </strong></td>
               <td><input type="number" id="input-budget"
                          style="width: 200px; border: 0"></td>
             </tr>
             <tr>
-              <td><strong>Timer reg. total: </strong></td>
+              <td><strong>{{ 'sprint_report_version.sub.spent_hours' | trans }}: </strong></td>
               <td>
                 <span id="spent_hours">{{ spentHours }}</span>
               </td>
             </tr>
             <tr>
-              <td><strong>Resterende timer planlagt total: </strong></td>
+              <td><strong>{{ 'sprint_report_version.sub.remaining_hours' | trans }}: </strong></td>
               <td id="remaining_hours">
                 {{ remainingHours }}
               </td>
             </tr>
             <tr>
-              <td><strong>Projektets timer: </strong></td>
+              <td><strong>{{ 'sprint_report_version.sub.project_hours' | trans }}: </strong></td>
               <td id="project_hours">
                 {{ spentHours + remainingHours }}
               </td>
             </tr>
             <tr>
-              <td><strong>Færdiggørelsesgrad (%): </strong></td>
+              <td><strong>{{ 'sprint_report_version.sub.finished_degree' | trans }}: </strong></td>
               <td><input type="number"
                          id="input_finished_degree"
                          max="100" min="0" style="width: 200px; border: 0;">
               </td>
             </tr>
             <tr>
-              <td><strong>Project total forecast: </strong></td>
+              <td><strong>{{ 'sprint_report_version.sub.project_forecast' | trans }}: </strong></td>
               <td><span id="project_total_forecast"></span></td>
             </tr>
             <tr>
-              <td><strong>Over/underløb - index: </strong></td>
+              <td><strong>{{ 'sprint_report_version.sub.over_under_index' | trans }}: </strong></td>
               <td><span id="over_under_index"></span></td>
             </tr>
             </tbody>
@@ -61,14 +61,14 @@
       </div>
     </div>
     <div>
-      <h3>Projektets faser:</h3>
-      <table class="table">
+      <h3>{{ 'sprint_report_version.heading_phases' | trans }}</h3>
+      <table class="table table-bordered">
         <thead>
         <tr>
-          <th>EPIC</th>
-          <th>Est.</th>
-          <th>Resterende arbejde est.</th>
-          <th>Registreret</th>
+          <th>{{ 'sprint_report_version.table.epic' | trans }}</th>
+          <th>{{ 'sprint_report_version.table.estimate' | trans }}</th>
+          <th>{{ 'sprint_report_version.table.remaining_hours' | trans }}</th>
+          <th>{{ 'sprint_report_version.table.registered_hours' | trans }}</th>
         </tr>
         </thead>
         <tbody>
@@ -83,15 +83,16 @@
         </tbody>
       </table>
     </div>
+
     <div>
-      <h3>Forbrugt pr. uge:</h3>
-      <table class="table">
+      <h3>{{ 'sprint_report_version.heading_spent_hours' | trans }}</h3>
+      <table class="table table-bordered">
         <thead>
         <tr>
-          <th>EPIC</th>
-          <th>Est.</th>
-          <th>Reg.</th>
-          <th>Ingen sprint</th>
+          <th>{{ 'sprint_report_version.table.epic' | trans }}</th>
+          <th>{{ 'sprint_report_version.table.estimate' | trans }}</th>
+          <th>{{ 'sprint_report_version.table.reg' | trans }}</th>
+          <th>{{ 'sprint_report_version.table.no_sprint' | trans }}</th>
           {% for sprint in sprints|reverse %}
             {% if sprint.state != 'FUTURE' %}
               <th>{{ sprint.shortName }}</th>
@@ -106,6 +107,7 @@
             <td>{{ epic.originalEstimateSum / 60 / 60 }}</td>
             <td>{{ epic.spentSum / 60 / 60 }}</td>
               <td>
+                {# @TODO: Move calculation to controller #}
                 {% if epic.worklogs is defined %}
                   {% set loggedWork = 0 %}
                   {% for key, worklogs in epic.worklogs %}
@@ -123,6 +125,7 @@
             {% for sprint in sprints|reverse %}
               {% if sprint.state != 'FUTURE' %}
                 <td>
+                  {# @TODO: Move calculation to controller #}
                   {% if epic.worklogs is defined %}
                     {% set loggedWork = 0 %}
                     {% for key, worklogs in epic.worklogs %}
@@ -146,13 +149,13 @@
     </div>
 
     <div>
-      <h3>Planlagt pr. uge:</h3>
-      <table class="table">
+      <h3>{{ 'sprint_report_version.heading_planned_hours' | trans }}</h3>
+      <table class="table table-bordered">
         <thead>
         <tr>
-          <th>EPIC</th>
-          <th>Est.</th>
-          <th>Rest. arb.</th>
+          <th>{{ 'sprint_report_version.table.epic' | trans }}</th>
+          <th>{{ 'sprint_report_version.table.estimate' | trans }}</th>
+          <th>{{ 'sprint_report_version.table.remaining_hours_short' | trans }}</th>
           {% for sprint in sprints|reverse %}
             {% if sprint.state == 'FUTURE' %}
               <th>{{ sprint.shortName }}</th>
@@ -169,6 +172,7 @@
             {% for sprint in sprints|reverse %}
               {% if sprint.state == 'FUTURE' %}
                 <td>
+                  {# @TODO: Move calculation to controller #}
                   {% set sprintRemainingSum = 0 %}
                   {% for issue in issues %}
                     {% if issue.epic.id == epic.id and issue.sprints|length %}
