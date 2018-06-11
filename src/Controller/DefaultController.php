@@ -210,11 +210,12 @@ class DefaultController extends Controller
                     $issue->epic->worklogs = [];
                 }
                 foreach ($issue->fields->worklog->worklogs as $worklog) {
-                    $this->started = date($worklog->started);
+                    $this->worklogStarted = strtotime($worklog->started);
                     $sprint = array_filter($sprints, function($k) {
                         return
-                            $k->startDate < $this->started &&
-                            $k->endDate > $this->started;
+                            strtotime($k->startDate) <= $this->worklogStarted &&
+                            // @TODO: Used $k->completeDate for CLOSED sprints.
+                            strtotime($k->endDate) > $this->worklogStarted;
                     });
 
                     if (!empty($sprint)) {
@@ -250,14 +251,11 @@ class DefaultController extends Controller
                 }
             }
 
-            $epicSprintOverview = [];
-            foreach ($epics as $key => $epic) {
-                $epicSprintOverview[$key] = [];
-            }
+            // @TODO: Calculate epic.loggedWork[sprint.id]
+            // @TODO: Calculate epic.remainingWork[sprint.id]
 
-            foreach ($issues as $issue) {
-
-            }
+            // Sort sprints by key.
+            ksort($sprints);
 
             // Calculate spent, remaining hours.
             $spentHours = $spentSum / 3600;
@@ -275,7 +273,6 @@ class DefaultController extends Controller
                     'spentHours' => $spentHours,
                     'remainingHours' => $remainingHours,
                     'epics' => $epics,
-                    'epicSprintOverview' => $epicSprintOverview,
                 ]
             );
         } catch (HttpException $e) {
