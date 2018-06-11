@@ -153,6 +153,7 @@ class DefaultController extends Controller
                 'spentSum' => 0,
                 'remainingSum' => 0,
                 'originalEstimateSum' => 0,
+                'plannedWorkSum' => 0,
             ];
             $sprints = [];
             $spentSum = 0;
@@ -186,6 +187,10 @@ class DefaultController extends Controller
                     if (!isset($sprints[$sprint['id']])) {
                         $sprints[$sprint['id']] = (object) $sprint;
                     }
+
+                    if ($sprint['state'] == 'ACTIVE' || $sprint['state'] == 'FUTURE') {
+                        $issue->assignedToSprint = (object) $sprint;
+                    }
                 }
 
                 // Get issue epic.
@@ -198,6 +203,7 @@ class DefaultController extends Controller
                         $epic->spentSum = 0;
                         $epic->remainingSum = 0;
                         $epic->originalEstimateSum = 0;
+                        $epic->plannedWorkSum = 0;
                     }
                     $issue->epic = $epics[$issue->fields->{$customFieldEpicLink->key}];
                 }
@@ -208,6 +214,9 @@ class DefaultController extends Controller
                 // Gather worklogs for sprints/epics.
                 if (!isset($issue->epic->worklogs)) {
                     $issue->epic->worklogs = [];
+                }
+                if (!isset($issue->epic->loggedWork)) {
+                    $issue->epic->loggedWork = [];
                 }
                 foreach ($issue->fields->worklog->worklogs as $worklog) {
                     $this->worklogStarted = strtotime($worklog->started);
@@ -225,12 +234,16 @@ class DefaultController extends Controller
                             $issue->epic->worklogs[$sprint->id] = [];
                         }
                         $issue->epic->worklogs[$sprint->id][] = $worklog;
+
+                        $issue->epic->loggedWork[$sprint->id] = (isset($issue->epic->loggedWork[$sprint->id]) ? $issue->epic->loggedWork[$sprint->id] : 0) + $worklog->timeSpentSeconds;
                     }
                     else {
                         if (!isset($issue->epic->worklogs['NoSprint'])) {
                             $issue->epic->worklogs['NoSprint'] = [];
                         }
                         $issue->epic->worklogs['NoSprint'][] = $worklog;
+
+                        $issue->epic->loggedWork['NoSprint'] = (isset($issue->epic->loggedWork['NoSprint']) ? $issue->epic->loggedWork['NoSprint'] : 0) + $worklog->timeSpentSeconds;
                     }
                 }
 
@@ -243,6 +256,12 @@ class DefaultController extends Controller
                     $remainingSum = $remainingSum + $issue->fields->timetracking->remainingEstimateSeconds;
 
                     $issue->epic->remainingSum = $issue->epic->remainingSum + $issue->fields->timetracking->remainingEstimateSeconds;
+
+                    if (!empty($issue->assignedToSprint)) {
+                        $sprint = $issue->assignedToSprint;
+                        $issue->epic->remainingWork[$sprint->id] = (isset($issue->epic->remainingWork[$sprint->id]) ? $issue->epic->remainingWork[$sprint->id] : 0) + $issue->fields->timetracking->remainingEstimateSeconds;
+                        $issue->epic->plannedWorkSum = $issue->epic->plannedWorkSum + $issue->fields->timetracking->remainingEstimateSeconds;
+                    }
                 }
 
                 // Accumulate originalEstimateSum.
@@ -250,9 +269,6 @@ class DefaultController extends Controller
                     $issue->epic->originalEstimateSum = $issue->epic->originalEstimateSum + $issue->fields->timeoriginalestimate;
                 }
             }
-
-            // @TODO: Calculate epic.loggedWork[sprint.id]
-            // @TODO: Calculate epic.remainingWork[sprint.id]
 
             // Sort sprints by key.
             ksort($sprints);

@@ -107,37 +107,15 @@
             <td>{{ epic.originalEstimateSum / 60 / 60 }}</td>
             <td>{{ epic.spentSum / 60 / 60 }}</td>
               <td>
-                {# @TODO: Move calculation to controller #}
-                {% if epic.worklogs is defined %}
-                  {% set loggedWork = 0 %}
-                  {% for key, worklogs in epic.worklogs %}
-                    {% if key == 'NoSprint' %}
-                      {% for worklog in worklogs %}
-                        {% set loggedWork = loggedWork + worklog.timeSpentSeconds %}
-                      {% endfor %}
-                    {% endif %}
-                  {% endfor %}
-                  {% if loggedWork > 0 %}
-                    {{ loggedWork / 60 / 60 }}
-                  {% endif %}
+                {% if epic.loggedWork['NoSprint'] is defined %}
+                  {{ epic.loggedWork['NoSprint'] / 60 / 60 }}
                 {% endif %}
               </td>
             {% for sprint in sprints %}
               {% if sprint.state != 'FUTURE' %}
                 <td>
-                  {# @TODO: Move calculation to controller #}
-                  {% if epic.worklogs is defined %}
-                    {% set loggedWork = 0 %}
-                    {% for key, worklogs in epic.worklogs %}
-                      {% if key == sprint.id %}
-                        {% for worklog in worklogs %}
-                          {% set loggedWork = loggedWork + worklog.timeSpentSeconds %}
-                        {% endfor %}
-                      {% endif %}
-                    {% endfor %}
-                    {% if loggedWork > 0 %}
-                      {{ loggedWork / 60 / 60 }}
-                    {% endif %}
+                  {% if epic.loggedWork[sprint.id] is defined %}
+                    {{ epic.loggedWork[sprint.id] / 60 / 60 }}
                   {% endif %}
                 </td>
               {% endif %}
@@ -155,9 +133,10 @@
         <tr>
           <th>{{ 'sprint_report_version.table.epic' | trans }}</th>
           <th>{{ 'sprint_report_version.table.estimate' | trans }}</th>
-          <th>{{ 'sprint_report_version.table.remaining_hours_short' | trans }}</th>
+          <th>{{ 'sprint_report_version.table.remaining_hours' | trans }}</th>
+          <th>{{ 'sprint_report_version.table.planned_work_sum' | trans }}</th>
           {% for sprint in sprints %}
-            {% if sprint.state == 'FUTURE' %}
+            {% if sprint.state == 'FUTURE' or sprint.state == 'ACTIVE' %}
               <th>{{ sprint.shortName }}</th>
             {% endif %}
           {% endfor %}
@@ -169,20 +148,12 @@
             <td>{{ epic.name }}</td>
             <td>{{ epic.originalEstimateSum / 60 / 60 }}</td>
             <td>{{ epic.remainingSum / 60 / 60 }}</td>
+            <td>{{ epic.plannedWorkSum / 60 / 60 }}</td>
             {% for sprint in sprints %}
-              {% if sprint.state == 'FUTURE' %}
+              {% if sprint.state == 'FUTURE' or sprint.state == 'ACTIVE' %}
                 <td>
-                  {# @TODO: Move calculation to controller #}
-                  {% set sprintRemainingSum = 0 %}
-                  {% for issue in issues %}
-                    {% if issue.epic.id == epic.id and issue.sprints|length %}
-                      {% if ((issue.sprints|last).id == sprint.id) %}
-                        {% set sprintRemainingSum = sprintRemainingSum + issue.fields.timetracking.remainingEstimateSeconds %}
-                      {% endif %}
-                    {% endif %}
-                  {% endfor %}
-                  {% if sprintRemainingSum > 0 %}
-                    {{ sprintRemainingSum / 60 / 60 }}
+                  {% if epic.remainingWork[sprint.id] is defined %}
+                    {{ epic.remainingWork[sprint.id] / 60 / 60 }}
                   {% endif %}
                 </td>
               {% endif %}
