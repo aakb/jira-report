@@ -1,0 +1,9 @@
+hwi_oauth:
+    firewall_name: secured_area
+    resource_owners:
+        jira:
+            type:                jira
+            client_id:           '%env(JIRA_OAUTH_CUSTOMER_KEY)%'
+            client_secret:       '%env(JIRA_OAUTH_PEM_PATH)%'
+            # Base URL of your Jira installation with no trailing slash (e.g. https://example.com/jira)
+            base_url:            '%env(JIRA_URL)%'

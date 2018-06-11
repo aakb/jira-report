@@ -1,0 +1,201 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+  <div class="container-fluid" style="max-width: 1400px; margin: 2em auto;">
+    <h1 style="margin-bottom: 1em">{{ 'sprint_report_version.heading' | trans }}</h1>
+    <div class="row">
+      <div class="col">
+        <div>
+          <h3>{{ 'sprint_report_version.heading_overview' | trans }}</h3>
+          <table class="table table-bordered">
+            <tbody>
+            <tr>
+              <td><strong>{{ 'sprint_report_version.sub.project' | trans }}: </strong></td>
+              <td>{{ project.name }}</td>
+            </tr>
+            <tr>
+              <td><strong>{{ 'sprint_report_version.sub.version' | trans }}: </strong></td>
+              <td>{{ version.name }}</td>
+            </tr>
+            <tr>
+              <td><strong>{{ 'sprint_report_version.sub.budget' | trans }}: </strong></td>
+              <td><input type="number" id="input-budget"
+                         style="width: 200px; border: 0"></td>
+            </tr>
+            <tr>
+              <td><strong>{{ 'sprint_report_version.sub.spent_hours' | trans }}: </strong></td>
+              <td>
+                <span id="spent_hours">{{ spentHours }}</span>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>{{ 'sprint_report_version.sub.remaining_hours' | trans }}: </strong></td>
+              <td id="remaining_hours">
+                {{ remainingHours }}
+              </td>
+            </tr>
+            <tr>
+              <td><strong>{{ 'sprint_report_version.sub.project_hours' | trans }}: </strong></td>
+              <td id="project_hours">
+                {{ spentHours + remainingHours }}
+              </td>
+            </tr>
+            <tr>
+              <td><strong>{{ 'sprint_report_version.sub.finished_degree' | trans }}: </strong></td>
+              <td><input type="number"
+                         id="input_finished_degree"
+                         max="100" min="0" style="width: 200px; border: 0;">
+              </td>
+            </tr>
+            <tr>
+              <td><strong>{{ 'sprint_report_version.sub.project_forecast' | trans }}: </strong></td>
+              <td><span id="project_total_forecast"></span></td>
+            </tr>
+            <tr>
+              <td><strong>{{ 'sprint_report_version.sub.over_under_index' | trans }}: </strong></td>
+              <td><span id="over_under_index"></span></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3>{{ 'sprint_report_version.heading_phases' | trans }}</h3>
+      <table class="table table-bordered">
+        <thead>
+        <tr>
+          <th>{{ 'sprint_report_version.table.epic' | trans }}</th>
+          <th>{{ 'sprint_report_version.table.estimate' | trans }}</th>
+          <th>{{ 'sprint_report_version.table.remaining_hours' | trans }}</th>
+          <th>{{ 'sprint_report_version.table.registered_hours' | trans }}</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for epic in epics %}
+          <tr>
+            <td>{{ epic.name }}</td>
+            <td>{{ epic.originalEstimateSum / 60 / 60 }}</td>
+            <td>{{ epic.remainingSum / 60 / 60 }}</td>
+            <td>{{ epic.spentSum / 60 / 60 }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <h3>{{ 'sprint_report_version.heading_spent_hours' | trans }}</h3>
+      <table class="table table-bordered">
+        <thead>
+        <tr>
+          <th>{{ 'sprint_report_version.table.epic' | trans }}</th>
+          <th>{{ 'sprint_report_version.table.estimate' | trans }}</th>
+          <th>{{ 'sprint_report_version.table.reg' | trans }}</th>
+          <th>{{ 'sprint_report_version.table.no_sprint' | trans }}</th>
+          {% for sprint in sprints %}
+            {% if sprint.state != 'FUTURE' %}
+              <th>{{ sprint.shortName }}</th>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for epic in epics %}
+          <tr>
+            <td>{{ epic.name }}</td>
+            <td>{{ epic.originalEstimateSum / 60 / 60 }}</td>
+            <td>{{ epic.spentSum / 60 / 60 }}</td>
+              <td>
+                {% if epic.loggedWork['NoSprint'] is defined %}
+                  {{ epic.loggedWork['NoSprint'] / 60 / 60 }}
+                {% endif %}
+              </td>
+            {% for sprint in sprints %}
+              {% if sprint.state != 'FUTURE' %}
+                <td>
+                  {% if epic.loggedWork[sprint.id] is defined %}
+                    {{ epic.loggedWork[sprint.id] / 60 / 60 }}
+                  {% endif %}
+                </td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <h3>{{ 'sprint_report_version.heading_planned_hours' | trans }}</h3>
+      <table class="table table-bordered">
+        <thead>
+        <tr>
+          <th>{{ 'sprint_report_version.table.epic' | trans }}</th>
+          <th>{{ 'sprint_report_version.table.estimate' | trans }}</th>
+          <th>{{ 'sprint_report_version.table.remaining_hours' | trans }}</th>
+          <th>{{ 'sprint_report_version.table.planned_work_sum' | trans }}</th>
+          {% for sprint in sprints %}
+            {% if sprint.state == 'FUTURE' or sprint.state == 'ACTIVE' %}
+              <th>{{ sprint.shortName }}</th>
+            {% endif %}
+          {% endfor %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for epic in epics %}
+          <tr>
+            <td>{{ epic.name }}</td>
+            <td>{{ epic.originalEstimateSum / 60 / 60 }}</td>
+            <td>{{ epic.remainingSum / 60 / 60 }}</td>
+            <td>{{ epic.plannedWorkSum / 60 / 60 }}</td>
+            {% for sprint in sprints %}
+              {% if sprint.state == 'FUTURE' or sprint.state == 'ACTIVE' %}
+                <td>
+                  {% if epic.remainingWork[sprint.id] is defined %}
+                    {{ epic.remainingWork[sprint.id] / 60 / 60 }}
+                  {% endif %}
+                </td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+
+  <script type="text/javascript">
+      (function () {
+          function updateNumbers () {
+              var spentHours = parseFloat(document.querySelector('#spent_hours').innerHTML);
+              var finishedDegree = parseFloat(document.querySelector('#input_finished_degree').value);
+              var sales_budget = parseFloat(document.querySelector('#input-budget').value);
+
+              var forecast = null;
+              var over_under = null;
+
+              if (finishedDegree > 0) {
+                  forecast = spentHours / finishedDegree * 100;
+
+                  document.querySelector('#project_total_forecast').innerHTML = '' + forecast.toFixed(2);
+              }
+
+              if (sales_budget > 0 && forecast != null) {
+                  over_under = forecast / sales_budget;
+
+                  document.querySelector('#over_under_index').innerHTML = '' + over_under.toFixed(2);
+              }
+          }
+
+          document.querySelector('#input_finished_degree')
+              .addEventListener('blur', updateNumbers);
+          document.querySelector('#input-budget')
+              .addEventListener('blur', updateNumbers);
+      })();
+  </script>
+{% endblock %}
