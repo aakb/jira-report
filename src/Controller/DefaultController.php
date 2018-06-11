@@ -223,8 +223,7 @@ class DefaultController extends Controller
                     $sprint = array_filter($sprints, function($k) {
                         return
                             strtotime($k->startDate) <= $this->worklogStarted &&
-                            // @TODO: Used $k->completeDate for CLOSED sprints.
-                            strtotime($k->endDate) > $this->worklogStarted;
+                            (isset($k->completeDate) ? strtotime($k->completeDate) : strtotime($k->endDate)) > $this->worklogStarted;
                     });
 
                     if (!empty($sprint)) {
