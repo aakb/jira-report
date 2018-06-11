@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+  <div class="hwi_oauth_content container-fluid" style="margin-top: 50px">
+    <div class="row justify-content-md-center">
+      <div class="col-md-auto" style="margin-bottom: 50px">
+        <h1>{{ project.key }}: {{ project.name }}</h1>
+      </div>
+    </div>
+    <div class="row justify-content-md-center">
+      <div class="col-md-auto">
+        <div class="list-group">
+          <h3>{{ 'sprint_reports.list_version.help' | trans }}</h3>
+          {% for version in project.versions %}
+            <a class="list-group-item list-group-item-action" href="/sprint_report/version/{{ version.id }}"><div>{{ version.name }}</div></a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+  <div class="hwi_oauth_content container-fluid" style="margin-top: 50px">
+    <div class="row justify-content-md-center">
+      <div class="col-md-auto" style="margin-bottom: 50px">
+        <h1>{{ 'sprint_reports.heading' | trans }}</h1>
+      </div>
+    </div>
+    <div class="row justify-content-md-center">
+      <div class="col-md-auto">
+        <h3>{{ 'sprint_reports.list.help' | trans }}</h3>
+      </div>
+    </div>
+    <div class="row justify-content-md-center">
+      <div class="col-md-auto">
+        <div class="list-group">
+          {% for project in projects|slice(0,(projects|length / 2)) %}
+            <a class="list-group-item list-group-item-action"
+               href="sprint_report/project/{{ project.id }}">
+              <div><strong>{{ project.key }}:</strong> {{ project.name }}</div>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="col-md-auto">
+        <div class="list-group">
+          {% for project in projects|slice((projects|length / 2), (projects|length)) %}
+            <a class="list-group-item list-group-item-action"
+               href="sprint_report/project/{{ project.id }}">
+              <div><strong>{{ project.key }}:</strong> {{ project.name }}</div>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

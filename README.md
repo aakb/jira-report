@@ -20,17 +20,16 @@ Public Key: Insert public key
 Consumer Callback url: http://jira.vm/main/
 ```
 
-Set values in parameters.yml:
+Set values in .env:
 
 ```
-jira_oauth_customer_key: [KEY]
-jira_oauth_pem_path: [URL TO PRIVATE KEY]
-jira_url: 'https://[SITE].atlassian.net'
-jira_default_board: [TEAM BOARD ID]
+JIRA_OAUTH_CUSTOMER_KEY=[KEY]
+JIRA_OAUTH_PEM_PATH=[PATH TO PRIVATE KEY]
+JIRA_URL='https://[SITE].atlassian.net'
+JIRA_DEFAULT_BOARD=[TEAM BOARD ID]
 ```
 
 ## Links
 https://docs.atlassian.com/jira-software/REST/7.3.1/
 https://confluence.atlassian.com/adminjiraserver073/using-applinks-to-link-to-other-applications-861253079.html
 https://bitbucket.org/atlassian_tutorial/atlassian-oauth-examples
-

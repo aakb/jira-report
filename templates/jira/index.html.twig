@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+  <div class="hwi_oauth_content container-fluid" style="margin-top: 50px">
+    <div class="row justify-content-md-center">
+      <div class="col-md-auto" style="margin-bottom: 50px">
+        <h1>{{ 'index.heading' | trans }}</h1>
+      </div>
+    </div>
+    <div class="row justify-content-md-center">
+      <div class="col-md-auto">
+        <a href="/sprint_report">{{ 'index.menu.sprint_reports' | trans }}</a>
+      </div>
+    </div>
+  </div>
+{% endblock %}
