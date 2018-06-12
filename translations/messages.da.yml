@@ -5,6 +5,7 @@ index:
     heading: Jirarapporter
     menu:
         sprint_reports: Sprintrapporter
+        planning: Planlægningsoversigt
 sprint_reports:
     heading: Sprintrapporter
     list:
@@ -36,3 +37,8 @@ sprint_report_version:
         reg: Reg.
         no_sprint: Ingen sprint
         planned_work_sum: Sum af est. planlagt arb.
+planning:
+    headline:
+        headline: Planlægningsoversigt
+        projects: Projektoversigt
+        users: Brugeroversigt

@@ -1,28 +1,83 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-  <div id="app">
-    <table class="table table-bordered">
+  <div id="app" style="margin: 1em" class="table-responsive">
+
+    <h1>{{ 'planning.headline.headline' | trans }}</h1>
+
+    <h2>{{ 'planning.headline.users' | trans }}</h2>
+
+    <table class="table table-bordered table-sm" id="table-projects">
+      <thead>
+      <tr>
+        <th colspan="3">
+          <button class="btn btn-primary" type="button" data-toggle="collapse" data-target=".users-collapsable"><i class="fas fa-expand-arrows-alt"></i></button>
+        </th>
+        <th v-html="sprint.name" v-for="sprint in sprints"></th>
+      </tr>
+      </thead>
+      <tbody v-for="user in users">
+      <tr>
+        <td data-toggle="collapse" :href="'.users-' + user.key">
+          <strong v-html="user.displayName"></strong>
+          <i class="fas fa-expand-arrows-alt" style="float: right; margin: 0.5em"></i>
+        </td>
+        <td></td>
+        <td></td>
+        <td v-html="getRemainingEstimatUser(user, sprint)" v-for="sprint in sprints"></td>
+      </tr>
+      <template v-for="project in user.projects">
+        <tr class="collapse" :class="'users-' + user.key + ' users-collapsable'">
+          <td></td>
+          <td><strong v-html="project.name"></strong></td>
+          <td></td>
+          <td :colspan="sprints.length"></td>
+        </tr>
+        <tr class="collapse" v-for="issue in project.users[user.key].issues" :class="'users-' + user.key + ' project-collapsable'">
+          <td></td>
+          <td style="padding-left: 1em"><span v-html="issue.fields.summary"></span></td>
+          <td><a :href="'{{ jiraUrl }}/browse/' + issue.key"><span v-html="issue.key"></span></a></td>
+          <td v-html="getRemainingEstimatIssue(sprint, issue)" v-for="sprint in sprints"></td>
+        </tr>
+      </template>
+      </tbody>
+    </table>
+
+    <h2>{{ 'planning.headline.projects' | trans }}</h2>
+
+    <table class="table table-bordered table-sm" id="table-projects">
       <thead>
         <tr>
-          <th></th>
-          <th></th>
-          <th></th>
+          <th colspan="3">
+            <button class="btn btn-primary" type="button" data-toggle="collapse" data-target=".project-collapsable"><i class="fas fa-expand-arrows-alt"></i></button>
+          </th>
           <th v-html="sprint.name" v-for="sprint in sprints"></th>
         </tr>
       </thead>
       <tbody v-for="project in projects">
         <tr>
-          <td v-html="project.name"></td>
+          <td data-toggle="collapse" :href="'.projects-' + project.id">
+            <strong v-html="project.name"></strong>
+            <i class="fas fa-expand-arrows-alt" style="float: right; margin: 0.5em"></i>
+          </td>
           <td></td>
           <td></td>
           <td v-html="getRemainingEstimat(project, sprint)" v-for="sprint in sprints"></td>
         </tr>
-        <tr v-for="user in project.users">
-          <td></td>
-          <td v-html="user.displayName"></td>
-          <td></td>
-        </tr>
+        <template v-for="user in project.users">
+          <tr class="collapse" :class="'projects-' + project.id + ' project-collapsable'">
+            <td></td>
+            <td><strong v-html="user.displayName"></strong></td>
+            <td></td>
+            <td :colspan="sprints.length"></td>
+          </tr>
+          <tr class="collapse" v-for="issue in user.issues" :class="'projects-' + project.id + ' project-collapsable'">
+            <td></td>
+            <td style="padding-left: 1em"><span v-html="issue.fields.summary"></span></td>
+            <td><a :href="'{{ jiraUrl }}/browse/' + issue.key"><span v-html="issue.key"></span></a></td>
+            <td v-html="getRemainingEstimatIssue(sprint, issue)" v-for="sprint in sprints"></td>
+          </tr>
+        </template>
       </tbody>
     </table>
   </div>
@@ -50,6 +105,10 @@
 
                           for (var i = 0; i < this.sprints.length; i++) {
                               this.getSprint(this.sprints[i].id, i);
+
+                              if (i > 10) {
+                                  break;
+                              }
                           }
                       }.bind(this))
                       .catch(function (error) {
@@ -57,6 +116,26 @@
                       });
               },
               methods: {
+                  getRemainingEstimatIssue: function (sprint, issue) {
+                      if (sprint.hasOwnProperty('issuesById') && sprint.issuesById.hasOwnProperty(issue.id)) {
+                          if (isNaN(sprint.issuesById[issue.id].fields.timetracking.remainingEstimateSeconds)) {
+                              return 'UE'
+                          }
+
+                          return sprint.issuesById[issue.id].fields.timetracking.remainingEstimateSeconds / 3600;
+                      }
+                      else {
+                          return '';
+                      }
+                  },
+                  getRemainingEstimatUser: function (user, sprint) {
+                      if (user.timeRemaining.hasOwnProperty(sprint.id)) {
+                          return user.timeRemaining[sprint.id] / 3600;
+                      }
+                      else {
+                          return '';
+                      }
+                  },
                   getRemainingEstimat: function (project, sprint) {
                       if (project.timeRemaining.hasOwnProperty(sprint.id)) {
                           return project.timeRemaining[sprint.id] / 3600;
@@ -66,8 +145,6 @@
                       }
                   },
                   updateGlobalTable: function (sprint) {
-                      console.log(sprint);
-
                       for (var issue in sprint.issues) {
                           var issue = sprint.issues[issue];
                           var assigned = issue.fields.assignee;
@@ -75,12 +152,16 @@
                           var timeRemaining = issue.fields.timetracking.remainingEstimateSeconds;
                           var saveProject = null;
 
+                          // Projects
+
                           if (this.projects.hasOwnProperty(project.id)) {
                               saveProject = this.projects[project.id];
                           }
                           else {
                               saveProject = project;
                           }
+
+                          saveProject.open = false;
 
                           if (!saveProject.hasOwnProperty('timeRemaining')) {
                               saveProject.timeRemaining = {};
@@ -94,8 +175,17 @@
                               saveProject.users = {};
                           }
 
-                          if (!saveProject.users.hasOwnProperty(assigned.key)) {
-                              saveProject.users[assigned.key] = assigned;
+                          if (!assigned) {
+                              saveProject.users['unassigned'] = {
+                                  displayName: 'Unassigned',
+                                  key: 'unassigned'
+                              };
+                              assigned = saveProject.users['unassigned'];
+                          }
+                          else {
+                              if (!saveProject.users.hasOwnProperty(assigned.key)) {
+                                  saveProject.users[assigned.key] = assigned;
+                              }
                           }
 
                           if (!saveProject.users[assigned.key].hasOwnProperty('issues')) {
@@ -105,6 +195,35 @@
                           saveProject.users[assigned.key].issues[issue.id] = issue;
 
                           Vue.set(this.projects, saveProject.id, saveProject);
+
+                          // Users
+
+                          var saveUser = null;
+
+                          if (this.users.hasOwnProperty(assigned.key)) {
+                              saveUser = this.users[assigned.key];
+                          }
+                          else {
+                              saveUser = assigned;
+                          }
+
+                          if (!saveUser.hasOwnProperty('projects')) {
+                              saveUser.projects = {};
+                          }
+
+                          if (!saveUser.projects.hasOwnProperty(saveProject.id)) {
+                              saveUser.projects[saveProject.id] = saveProject;
+                          }
+
+                          if (!saveUser.hasOwnProperty('timeRemaining')) {
+                              saveUser.timeRemaining = {};
+                          }
+
+                          if (timeRemaining) {
+                              saveUser.timeRemaining[sprint.id] = (saveUser.timeRemaining.hasOwnProperty(sprint.id) ? saveUser.timeRemaining[sprint.id] : 0) + timeRemaining;
+                          }
+
+                          Vue.set(this.users, saveUser.key, saveUser);
                       }
                   },
                   getSprint: function (id, index) {
@@ -112,7 +231,13 @@
                           .then(function (response) {
                               var value = this.sprints[index];
                               value.issues = response.data.issues;
-                              value.numberOfIssues = value.issues.length;
+                              value.issuesById = {};
+
+                              for (var issue in value.issues) {
+                                  issue = value.issues[issue];
+
+                                  value.issuesById[issue.id] = issue;
+                              }
 
                               Vue.set(this.sprints, index, value);
 

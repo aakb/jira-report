@@ -135,10 +135,19 @@ class JiraService
     public function getIssuesInSprint($sprintId) {
         $boardId = getenv('JIRA_DEFAULT_BOARD');
         $issues = [];
+        $fields = implode(
+            ',',
+            [
+                'timetracking',
+                'summary',
+                'assignee',
+                'project',
+            ]
+        );
 
         $start = 0;
         while (true) {
-            $result = $this->get('/rest/agile/1.0/board/'.$boardId.'/sprint/'.$sprintId.'/issue');
+            $result = $this->get('/rest/agile/1.0/board/'.$boardId.'/sprint/'.$sprintId.'/issue?fields='.$fields);
             $issues = array_merge($issues, $result->issues);
 
             $start = $start + 50;
@@ -284,7 +293,7 @@ class JiraService
             // Get issue epic.
             if (isset($issue->fields->{$customFieldEpicLink->key})) {
                 if (!isset($epics[$issue->fields->{$customFieldEpicLink->key}])) {
-                    $epic = $epics[$issue->fields->{$customFieldEpicLink->key}] = $jira->get(
+                    $epic = $epics[$issue->fields->{$customFieldEpicLink->key}] = $this->get(
                         'rest/agile/1.0/epic/'.$issue->fields->{$customFieldEpicLink->key}
                     );
 

@@ -86,8 +86,13 @@ class DefaultController extends Controller
      * @Method("GET")
      */
     public function planningOverviewAction(JiraService $jira) {
+        $jiraUrl = getenv('JIRA_URL');
+
         return $this->render(
-            'jira/planning.html.twig'
+            'jira/planning.html.twig',
+            [
+                'jiraUrl' => $jiraUrl,
+            ]
         );
     }
 
