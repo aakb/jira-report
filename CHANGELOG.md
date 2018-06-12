@@ -1,5 +1,10 @@
 # Jira report
 
+## 1.1.1
+
+* Added colors to user sprints.
+* Moved js to file.
+
 ## 1.1.0
 
 * Added planning overview.
