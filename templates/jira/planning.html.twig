@@ -1,0 +1,130 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+  <div id="app">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th v-html="sprint.name" v-for="sprint in sprints"></th>
+        </tr>
+      </thead>
+      <tbody v-for="project in projects">
+        <tr>
+          <td v-html="project.name"></td>
+          <td></td>
+          <td></td>
+          <td v-html="getRemainingEstimat(project, sprint)" v-for="sprint in sprints"></td>
+        </tr>
+        <tr v-for="user in project.users">
+          <td></td>
+          <td v-html="user.displayName"></td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+
+  <script src="js/vue-2.5.16.min.js"></script>
+  <script src="js/axios-0.18.0.min.js"></script>
+
+  <script type="text/javascript">
+      (function () {
+          var app = new Vue({
+              el: '#app',
+              data: {
+                  sprints: [],
+                  users: {},
+                  projects: {}
+              },
+              created: function () {
+                  axios.get('/future_sprints')
+                      .then(function (response) {
+                          this.sprints = response.data.sprints;
+
+                          for (var i = 0; i < this.sprints.length; i++) {
+                              this.getSprint(this.sprints[i].id, i);
+                          }
+                      }.bind(this))
+                      .catch(function (error) {
+                          console.log(error);
+                      });
+              },
+              methods: {
+                  getRemainingEstimat: function (project, sprint) {
+                      if (project.timeRemaining.hasOwnProperty(sprint.id)) {
+                          return project.timeRemaining[sprint.id] / 3600;
+                      }
+                      else {
+                          return '';
+                      }
+                  },
+                  updateGlobalTable: function (sprint) {
+                      console.log(sprint);
+
+                      for (var issue in sprint.issues) {
+                          var issue = sprint.issues[issue];
+                          var assigned = issue.fields.assignee;
+                          var project = issue.fields.project;
+                          var timeRemaining = issue.fields.timetracking.remainingEstimateSeconds;
+                          var saveProject = null;
+
+                          if (this.projects.hasOwnProperty(project.id)) {
+                              saveProject = this.projects[project.id];
+                          }
+                          else {
+                              saveProject = project;
+                          }
+
+                          if (!saveProject.hasOwnProperty('timeRemaining')) {
+                              saveProject.timeRemaining = {};
+                          }
+
+                          if (timeRemaining) {
+                              saveProject.timeRemaining[sprint.id] = (saveProject.timeRemaining.hasOwnProperty(sprint.id) ? saveProject.timeRemaining[sprint.id] : 0) + timeRemaining;
+                          }
+
+                          if (!saveProject.hasOwnProperty('users')) {
+                              saveProject.users = {};
+                          }
+
+                          if (!saveProject.users.hasOwnProperty(assigned.key)) {
+                              saveProject.users[assigned.key] = assigned;
+                          }
+
+                          if (!saveProject.users[assigned.key].hasOwnProperty('issues')) {
+                              saveProject.users[assigned.key].issues = {};
+                          }
+
+                          saveProject.users[assigned.key].issues[issue.id] = issue;
+
+                          Vue.set(this.projects, saveProject.id, saveProject);
+                      }
+                  },
+                  getSprint: function (id, index) {
+                      axios.get('/issues/' + id)
+                          .then(function (response) {
+                              var value = this.sprints[index];
+                              value.issues = response.data.issues;
+                              value.numberOfIssues = value.issues.length;
+
+                              Vue.set(this.sprints, index, value);
+
+                              this.updateGlobalTable(value);
+                          }.bind(this))
+                          .catch(function (error) {
+                              console.log(error);
+                          });
+                  }
+              }
+          });
+
+      })();
+  </script>
+{% endblock %}
