@@ -12,6 +12,24 @@
   margin-bottom: 1em;
 }
 
+.remaining-warning {
+  color: white;
+  background-color: #ffc107;
+  font-weight: bold;
+}
+
+.remaining-danger {
+  color: white;
+  background-color: #dc3545;
+  font-weight: bold;
+}
+
+.remaining-success {
+  color: white;
+  background-color: #28a745;
+  font-weight: bold;
+}
+
 .loader-wrapper {
   z-index: 2;
   position: fixed;
