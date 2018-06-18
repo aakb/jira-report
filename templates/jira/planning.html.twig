@@ -125,7 +125,7 @@
 {% block javascripts %}
   {{ parent() }}
 
-  <script src="js/vue-2.5.16.min.js"></script>
-  <script src="js/axios-0.18.0.min.js"></script>
-  <script src="js/planning.js"></script>
+  <script src="{{ asset('js/vue-2.5.16.min.js') }}"></script>
+  <script src="{{ asset('js/axios-0.18.0.min.js') }}"></script>
+  <script src="{{ asset('js/planning.js') }}"></script>
 {% endblock %}

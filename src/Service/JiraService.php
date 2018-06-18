@@ -147,7 +147,7 @@ class JiraService
 
         $start = 0;
         while (true) {
-            $result = $this->get('/rest/agile/1.0/board/'.$boardId.'/sprint/'.$sprintId.'/issue?fields='.$fields);
+            $result = $this->get('/rest/agile/1.0/board/'.$boardId.'/sprint/'.$sprintId.'/issue?startAt=' . $start . '&fields='.$fields);
             $issues = array_merge($issues, $result->issues);
 
             $start = $start + 50;
