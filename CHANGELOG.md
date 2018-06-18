@@ -1,5 +1,9 @@
 # Jira report
 
+## 1.1.2
+
+* Added active sprint to planning overview.
+
 ## 1.1.1
 
 * Added colors to user sprints.
