@@ -113,7 +113,7 @@ class JiraService
 
         $start = 0;
         while (true) {
-            $result = $this->get('/rest/agile/1.0/board/' . $boardId . '/sprint?startAt='.$start.'&maxResults=50&state=future');
+            $result = $this->get('/rest/agile/1.0/board/' . $boardId . '/sprint?startAt='.$start.'&maxResults=50&state=future,active');
             $sprints = array_merge($sprints, $result->values);
 
             if ($result->isLast) {
