@@ -1,5 +1,9 @@
 # Jira report
 
+## 1.1.3
+
+* Fixed bug where not all issues were loaded for a sprint.
+
 ## 1.1.2
 
 * Added active sprint to planning overview.

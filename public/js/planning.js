@@ -38,7 +38,7 @@
             },
             getRemainingEstimatUser: function (user, sprint) {
                 if (user.timeRemaining.hasOwnProperty(sprint.id)) {
-                    return user.timeRemaining[sprint.id] / 3600;
+                    return (user.timeRemaining[sprint.id] / 3600).toFixed(2);
                 }
                 else {
                     return '';
@@ -46,7 +46,7 @@
             },
             getRemainingEstimat: function (project, sprint) {
                 if (project.timeRemaining.hasOwnProperty(sprint.id)) {
-                    return project.timeRemaining[sprint.id] / 3600;
+                    return (project.timeRemaining[sprint.id] / 3600).toFixed(2);
                 }
                 else {
                     return '';
