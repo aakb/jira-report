@@ -26,11 +26,17 @@
         methods: {
             getRemainingEstimatIssue: function (sprint, issue) {
                 if (sprint.hasOwnProperty('issuesById') && sprint.issuesById.hasOwnProperty(issue.id)) {
-                    if (isNaN(sprint.issuesById[issue.id].fields.timetracking.remainingEstimateSeconds)) {
+                    var sprintIssue = sprint.issuesById.hasOwnProperty(issue.id);
+
+                    if (sprintIssue.fields.status.name === 'Done') {
+                        return 0;
+                    }
+
+                    if (isNaN(sprintIssue.fields.timetracking.remainingEstimateSeconds)) {
                         return 'UE';
                     }
 
-                    return sprint.issuesById[issue.id].fields.timetracking.remainingEstimateSeconds / 3600;
+                    return sprintIssue.fields.timetracking.remainingEstimateSeconds / 3600;
                 }
                 else {
                     return '';
@@ -58,6 +64,8 @@
                     var assigned = issue.fields.assignee;
                     var project = issue.fields.project;
                     var timeRemaining = issue.fields.timetracking.remainingEstimateSeconds;
+                    var issueStatus =  issue.fields.status.name;
+                    var issueNotDone = issueStatus !== 'Done';
                     var saveProject = null;
 
                     // Projects
@@ -75,7 +83,7 @@
                         saveProject.timeRemaining = {};
                     }
 
-                    if (timeRemaining) {
+                    if (timeRemaining && issueNotDone) {
                         saveProject.timeRemaining[sprint.id] = (saveProject.timeRemaining.hasOwnProperty(sprint.id) ? saveProject.timeRemaining[sprint.id] : 0) + timeRemaining;
                     }
 
@@ -127,7 +135,7 @@
                         saveUser.timeRemaining = {};
                     }
 
-                    if (timeRemaining) {
+                    if (timeRemaining && issueNotDone) {
                         saveUser.timeRemaining[sprint.id] = (saveUser.timeRemaining.hasOwnProperty(sprint.id) ? saveUser.timeRemaining[sprint.id] : 0) + timeRemaining;
                     }
 
