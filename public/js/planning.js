@@ -26,10 +26,10 @@
         methods: {
             getRemainingEstimatIssue: function (sprint, issue) {
                 if (sprint.hasOwnProperty('issuesById') && sprint.issuesById.hasOwnProperty(issue.id)) {
-                    var sprintIssue = sprint.issuesById.hasOwnProperty(issue.id);
+                    var sprintIssue = sprint.issuesById[issue.id];
 
-                    if (sprintIssue.fields.status.name === 'Done') {
-                        return 0;
+                    if (sprintIssue.done) {
+                        return 'Done';
                     }
 
                     if (isNaN(sprintIssue.fields.timetracking.remainingEstimateSeconds)) {
@@ -64,9 +64,10 @@
                     var assigned = issue.fields.assignee;
                     var project = issue.fields.project;
                     var timeRemaining = issue.fields.timetracking.remainingEstimateSeconds;
-                    var issueStatus =  issue.fields.status.name;
-                    var issueNotDone = issueStatus !== 'Done';
+                    var issueDone = issue.fields.hasOwnProperty('status') && issue.fields.status.name === 'Done';
                     var saveProject = null;
+
+                    issue.done = issueDone;
 
                     // Projects
 
@@ -83,7 +84,7 @@
                         saveProject.timeRemaining = {};
                     }
 
-                    if (timeRemaining && issueNotDone) {
+                    if (timeRemaining && !issueDone) {
                         saveProject.timeRemaining[sprint.id] = (saveProject.timeRemaining.hasOwnProperty(sprint.id) ? saveProject.timeRemaining[sprint.id] : 0) + timeRemaining;
                     }
 
@@ -135,7 +136,7 @@
                         saveUser.timeRemaining = {};
                     }
 
-                    if (timeRemaining && issueNotDone) {
+                    if (timeRemaining && !issueDone) {
                         saveUser.timeRemaining[sprint.id] = (saveUser.timeRemaining.hasOwnProperty(sprint.id) ? saveUser.timeRemaining[sprint.id] : 0) + timeRemaining;
                     }
 
