@@ -3,6 +3,7 @@
 ## in develop
 
 * Fixed remaining estimate.
+* Sorted lists.
 
 ## 1.1.3
 

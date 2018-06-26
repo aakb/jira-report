@@ -24,7 +24,7 @@
             <th v-html="sprint.name" v-for="sprint in sprints"></th>
           </tr>
           </thead>
-          <tbody v-for="user in users">
+          <tbody v-for="user in sortedUsers">
           <tr>
             <td data-toggle="collapse" :href="'.users-' + user.key">
               <strong v-html="user.displayName"></strong>
@@ -80,7 +80,7 @@
             <th v-html="sprint.name" v-for="sprint in sprints"></th>
           </tr>
           </thead>
-          <tbody v-for="project in projects">
+          <tbody v-for="project in sortedProjects">
           <tr>
             <td data-toggle="collapse" :href="'.projects-' + project.id">
               <strong v-html="project.name"></strong>

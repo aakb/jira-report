@@ -10,6 +10,41 @@
             loading: true,
             numberLoaded: 0
         },
+        computed: {
+            sortedUsers: function () {
+                if (this.users === {}) {
+                    return [];
+                }
+
+                var arr = Object.keys(this.users).map(function (i) {
+                    return this.users[i];
+                }.bind(this));
+
+                arr = arr.sort(function (a,b) {
+                    if (a.key === 'unassigned') {
+                        return 1;
+                    }
+                    return (a.displayName.toLocaleLowerCase() > b.displayName.toLocaleLowerCase()) ? 1 : -1;
+                });
+
+                return arr;
+            },
+            sortedProjects: function () {
+                if (this.projects === {}) {
+                    return [];
+                }
+
+                var arr = Object.keys(this.projects).map(function (i) {
+                    return this.projects[i];
+                }.bind(this));
+
+                arr = arr.sort(function (a,b) {
+                    return (a.name.toLocaleLowerCase() > b.name.toLocaleLowerCase()) ? 1 : -1;
+                });
+
+                return arr;
+            }
+        },
         created: function () {
             axios.get('/future_sprints')
                 .then(function (response) {
@@ -145,7 +180,7 @@
 
                 this.numberLoaded = this.numberLoaded + 1;
 
-                if (this.numberLoaded == this.sprints.length) {
+                if (this.numberLoaded === this.sprints.length) {
                     this.loading = false;
                 }
             },
