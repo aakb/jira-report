@@ -1,5 +1,10 @@
 # Jira report
 
+## in develop
+
+* Fixed remaining estimate.
+* Sorted lists.
+
 ## 1.1.3
 
 * Fixed bug where not all issues were loaded for a sprint.
