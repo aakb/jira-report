@@ -140,6 +140,7 @@ class JiraService
             [
                 'timetracking',
                 'summary',
+                'status',
                 'assignee',
                 'project',
             ]

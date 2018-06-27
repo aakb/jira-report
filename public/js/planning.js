@@ -10,6 +10,41 @@
             loading: true,
             numberLoaded: 0
         },
+        computed: {
+            sortedUsers: function () {
+                if (this.users === {}) {
+                    return [];
+                }
+
+                var arr = Object.keys(this.users).map(function (i) {
+                    return this.users[i];
+                }.bind(this));
+
+                arr = arr.sort(function (a,b) {
+                    if (a.key === 'unassigned') {
+                        return 1;
+                    }
+                    return (a.displayName.toLocaleLowerCase() > b.displayName.toLocaleLowerCase()) ? 1 : -1;
+                });
+
+                return arr;
+            },
+            sortedProjects: function () {
+                if (this.projects === {}) {
+                    return [];
+                }
+
+                var arr = Object.keys(this.projects).map(function (i) {
+                    return this.projects[i];
+                }.bind(this));
+
+                arr = arr.sort(function (a,b) {
+                    return (a.name.toLocaleLowerCase() > b.name.toLocaleLowerCase()) ? 1 : -1;
+                });
+
+                return arr;
+            }
+        },
         created: function () {
             axios.get('/future_sprints')
                 .then(function (response) {
@@ -26,11 +61,17 @@
         methods: {
             getRemainingEstimatIssue: function (sprint, issue) {
                 if (sprint.hasOwnProperty('issuesById') && sprint.issuesById.hasOwnProperty(issue.id)) {
-                    if (isNaN(sprint.issuesById[issue.id].fields.timetracking.remainingEstimateSeconds)) {
+                    var sprintIssue = sprint.issuesById[issue.id];
+
+                    if (sprintIssue.done) {
+                        return 'Done';
+                    }
+
+                    if (isNaN(sprintIssue.fields.timetracking.remainingEstimateSeconds)) {
                         return 'UE';
                     }
 
-                    return sprint.issuesById[issue.id].fields.timetracking.remainingEstimateSeconds / 3600;
+                    return sprintIssue.fields.timetracking.remainingEstimateSeconds / 3600;
                 }
                 else {
                     return '';
@@ -58,7 +99,10 @@
                     var assigned = issue.fields.assignee;
                     var project = issue.fields.project;
                     var timeRemaining = issue.fields.timetracking.remainingEstimateSeconds;
+                    var issueDone = issue.fields.hasOwnProperty('status') && issue.fields.status.name === 'Done';
                     var saveProject = null;
+
+                    issue.done = issueDone;
 
                     // Projects
 
@@ -75,7 +119,7 @@
                         saveProject.timeRemaining = {};
                     }
 
-                    if (timeRemaining) {
+                    if (timeRemaining && !issueDone) {
                         saveProject.timeRemaining[sprint.id] = (saveProject.timeRemaining.hasOwnProperty(sprint.id) ? saveProject.timeRemaining[sprint.id] : 0) + timeRemaining;
                     }
 
@@ -127,7 +171,7 @@
                         saveUser.timeRemaining = {};
                     }
 
-                    if (timeRemaining) {
+                    if (timeRemaining && !issueDone) {
                         saveUser.timeRemaining[sprint.id] = (saveUser.timeRemaining.hasOwnProperty(sprint.id) ? saveUser.timeRemaining[sprint.id] : 0) + timeRemaining;
                     }
 
@@ -136,7 +180,7 @@
 
                 this.numberLoaded = this.numberLoaded + 1;
 
-                if (this.numberLoaded == this.sprints.length) {
+                if (this.numberLoaded === this.sprints.length) {
                     this.loading = false;
                 }
             },
