@@ -9,7 +9,6 @@
             sprints: [],
             users: {},
             projects: {},
-            loading: true,
             numberLoaded: 0
         },
         computed: {
@@ -54,8 +53,6 @@
 
                     for (var i = 0; i < this.sprints.length; i++) {
                         this.getSprint(this.sprints[i].id, i);
-
-                        break;
                     }
                 }.bind(this))
                 .catch(function (error) {
