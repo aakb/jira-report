@@ -4,6 +4,8 @@
     var app = new Vue({
         el: '#app',
         data: {
+            toggle: {
+            },
             sprints: [],
             users: {},
             projects: {},
@@ -52,6 +54,8 @@
 
                     for (var i = 0; i < this.sprints.length; i++) {
                         this.getSprint(this.sprints[i].id, i);
+
+                        break;
                     }
                 }.bind(this))
                 .catch(function (error) {
@@ -59,6 +63,22 @@
                 });
         },
         methods: {
+            getToggle: function (key) {
+                var toggled = this.toggle.hasOwnProperty(key) && this.toggle[key];
+
+                if (toggled) {
+                    return '<i class="fas fa-angle-up"></i>';
+                }
+                else {
+                    return '<i class="fas fa-angle-down"></i>';
+                }
+            },
+            keyToggled: function (key) {
+                return this.toggle.hasOwnProperty(key) && this.toggle[key];
+            },
+            toggleKey: function (key) {
+                Vue.set(this.toggle, key, !this.toggle[key]);
+            },
             getRemainingEstimatIssue: function (sprint, issue) {
                 if (sprint.hasOwnProperty('issuesById') && sprint.issuesById.hasOwnProperty(issue.id)) {
                     var sprintIssue = sprint.issuesById[issue.id];
@@ -77,8 +97,35 @@
                     return '';
                 }
             },
+            getRemainingEstimatUserProjectSprint: function (user, project, sprint) {
+                var sum = 0;
+
+                if (user.projects.hasOwnProperty(project.id)) {
+                    var issues = user.projects[project.id].issues;
+                    for (var issue in issues) {
+                        issue = user.projects[project.id].issues[issue];
+
+                        if (issue.sprintId === sprint.id &&
+                            (issue.fields.hasOwnProperty('assignee') &&
+                             issue.fields.assignee &&
+                             user.key ===
+                                issue.fields.assignee.key) &&
+                            !issue.done &&
+                            issue.hasOwnProperty('timeRemaining') &&
+                            issue.timeRemaining > 0) {
+                            sum += issue.timeRemaining;
+                        }
+                    }
+                }
+
+                if (sum === 0) {
+                    return '';
+                }
+
+                return (sum / 3600).toFixed(2);
+            },
             getRemainingEstimatUser: function (user, sprint) {
-                if (user.timeRemaining.hasOwnProperty(sprint.id)) {
+                if (user.hasOwnProperty('timeRemaining') && user.timeRemaining.hasOwnProperty(sprint.id)) {
                     return (user.timeRemaining[sprint.id] / 3600).toFixed(2);
                 }
                 else {
@@ -86,7 +133,7 @@
                 }
             },
             getRemainingEstimat: function (project, sprint) {
-                if (project.timeRemaining.hasOwnProperty(sprint.id)) {
+                if (project.hasOwnProperty('timeRemaining') && project.timeRemaining.hasOwnProperty(sprint.id)) {
                     return (project.timeRemaining[sprint.id] / 3600).toFixed(2);
                 }
                 else {
@@ -95,7 +142,8 @@
             },
             updateGlobalTable: function (sprint) {
                 for (var issue in sprint.issues) {
-                    var issue = sprint.issues[issue];
+                    issue = sprint.issues[issue];
+
                     var assigned = issue.fields.assignee;
                     var project = issue.fields.project;
                     var timeRemaining = issue.fields.timetracking.remainingEstimateSeconds;
@@ -103,6 +151,8 @@
                     var saveProject = null;
 
                     issue.done = issueDone;
+                    issue.sprintId = sprint.id;
+                    issue.timeRemaining = timeRemaining;
 
                     // Projects
 
@@ -112,6 +162,12 @@
                     else {
                         saveProject = project;
                     }
+
+                    if (!saveProject.hasOwnProperty('issues')) {
+                        saveProject.issues = [];
+                    }
+
+                    saveProject.issues.push(issue);
 
                     saveProject.open = false;
 
@@ -176,12 +232,6 @@
                     }
 
                     Vue.set(this.users, saveUser.key, saveUser);
-                }
-
-                this.numberLoaded = this.numberLoaded + 1;
-
-                if (this.numberLoaded === this.sprints.length) {
-                    this.loading = false;
                 }
             },
             getSprint: function (id, index) {
