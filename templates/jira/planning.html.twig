@@ -2,11 +2,6 @@
 
 {% block body %}
   <div id="app" class="app">
-
-    <div class="loader-wrapper" v-if="loading">
-      <div class="loader">Loading...</div>
-    </div>
-
     <h1>{{ 'planning.headline.headline' | trans }}</h1>
 
     <div class="planning-section">
@@ -17,39 +12,44 @@
           <thead>
           <tr>
             <th colspan="3">
-              <button class="btn btn-primary" type="button"
-                      data-toggle="collapse" data-target=".users-collapsable">
-                <i class="fas fa-expand-arrows-alt"></i></button>
             </th>
             <th v-html="sprint.name" v-for="sprint in sprints"></th>
           </tr>
           </thead>
           <tbody v-for="user in sortedUsers">
           <tr>
-            <td data-toggle="collapse" :href="'.users-' + user.key">
+            <td>
               <strong v-html="user.displayName"></strong>
-              <i class="fas fa-expand-arrows-alt toggle"></i>
+              <a v-on:click="toggleKey(user.key)" class="toggle">
+                <span v-html="getToggle(user.key)"></span>
+              </a>
             </td>
             <td></td>
             <td></td>
-            <td v-html="getRemainingEstimatUser(user, sprint)"
-                v-bind:class="[
+            <td v-bind:class="[
                   {'remaining-warning': getRemainingEstimatUser(user, sprint) > 28 && getRemainingEstimatUser(user, sprint) <= 30},
                   {'remaining-danger': getRemainingEstimatUser(user, sprint) > 30 },
                   {'remaining-success': getRemainingEstimatUser(user, sprint) >= 24 && getRemainingEstimatUser(user, sprint) <= 28 }
                   ]"
-                v-for="sprint in sprints"></td>
+                v-for="sprint in sprints">
+              <strong v-html="getRemainingEstimatUser(user, sprint)"></strong>
+            </td>
           </tr>
-          <template v-for="project in user.projects">
-            <tr class="collapse"
-                :class="'users-' + user.key + ' users-collapsable'">
+          <template v-for="project in user.projects" v-if="keyToggled(user.key)">
+            <tr>
               <td></td>
-              <td><strong v-html="project.name"></strong></td>
+              <td>
+                <strong v-html="project.name"></strong>
+                <a v-on:click="toggleKey(user.key + '-' + project.id)" class="toggle">
+                  <span v-html="getToggle(user.key + '-' + project.id)"></span>
+                </a>
+              </td>
               <td></td>
-              <td :colspan="sprints.length"></td>
+              <td v-for="sprint in sprints">
+                <strong v-html="getRemainingEstimatUserProjectSprint(user, project, sprint)"></strong>
+              </td>
             </tr>
-            <tr class="collapse" v-for="issue in project.users[user.key].issues"
-                :class="'users-' + user.key + ' users-collapsable'">
+            <tr v-for="issue in project.users[user.key].issues" v-if="keyToggled(user.key + '-' + project.id)">
               <td></td>
               <td style="padding-left: 1em"><span
                     v-html="issue.fields.summary"></span></td>
@@ -72,35 +72,36 @@
           <thead>
           <tr>
             <th colspan="3">
-              <button class="btn btn-primary" type="button"
-                      data-toggle="collapse" data-target=".project-collapsable">
-                <i class="fas fa-expand-arrows-alt"></i>
-              </button>
             </th>
             <th v-html="sprint.name" v-for="sprint in sprints"></th>
           </tr>
           </thead>
           <tbody v-for="project in sortedProjects">
           <tr>
-            <td data-toggle="collapse" :href="'.projects-' + project.id">
+            <td>
               <strong v-html="project.name"></strong>
-              <i class="fas fa-expand-arrows-alt toggle"></i>
+              <a v-on:click="toggleKey(project.id)" class="toggle">
+                <span v-html="getToggle(project.id)"></span>
+              </a>
             </td>
             <td></td>
             <td></td>
             <td v-html="getRemainingEstimat(project, sprint)"
                 v-for="sprint in sprints"></td>
           </tr>
-          <template v-for="user in project.users">
-            <tr class="collapse"
-                :class="'projects-' + project.id + ' project-collapsable'">
+          <template v-for="user in project.users" v-if="keyToggled(project.id)">
+            <tr>
               <td></td>
-              <td><strong v-html="user.displayName"></strong></td>
+              <td>
+                <strong v-html="user.displayName"></strong>
+                <a v-on:click="toggleKey(project.id + '-' + user.key)" class="toggle">
+                  <span v-html="getToggle(project.id + '-' + user.key)"></span>
+                </a>
+              </td>
               <td></td>
               <td :colspan="sprints.length"></td>
             </tr>
-            <tr class="collapse" v-for="issue in user.issues"
-                :class="'projects-' + project.id + ' project-collapsable'">
+            <tr v-for="issue in user.issues" v-if="keyToggled(project.id + '-' + user.key)">
               <td></td>
               <td style="padding-left: 1em"><span
                     v-html="issue.fields.summary"></span></td>
