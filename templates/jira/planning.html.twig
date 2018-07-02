@@ -24,12 +24,13 @@
                 <a v-on:click="toggleKey(user.key)">
                   <span v-html="getToggle(user.key)"></span>
                 </a>
-                <a v-on:click="toggleUser(user.key)">
-                  <span><i class="fas fa-minus"></i></span>
-                </a>
               </div>
             </td>
-            <td></td>
+            <td>
+              <a v-on:click="toggleUser(user.key)">
+                <span><i class="fas fa-eye-slash"></i></span>
+              </a>
+            </td>
             <td></td>
             <td v-bind:class="[
                   {'remaining-warning': getRemainingEstimatUser(user, sprint) > 28 && getRemainingEstimatUser(user, sprint) <= 30},
@@ -68,10 +69,10 @@
         </table>
       </div>
       <div>
-        <div><strong>{{ 'planning.ignored_users' | trans }}</strong></div>
+        <div><i class="fas fa-eye-slash"></i> <strong>{{ 'planning.ignored_users' | trans }}</strong></div>
         <div v-for="user in sortedUsers" v-if="hideUsers.hasOwnProperty(user.key) && hideUsers[user.key] === true">
           <a v-on:click="toggleUser(user.key)">
-            <span v-html="user.displayName"></span><i class="fas fa-plus"></i>
+            <span v-html="user.displayName"></span> <i class="fas fa-eye"></i>
           </a>
         </div>
       </div>
