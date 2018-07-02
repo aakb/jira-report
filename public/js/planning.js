@@ -4,8 +4,8 @@
     var app = new Vue({
         el: '#app',
         data: {
-            toggle: {
-            },
+            hideUsers: {},
+            toggle: {},
             sprints: [],
             users: {},
             projects: {},
@@ -47,6 +47,12 @@
             }
         },
         created: function () {
+            var hideUsers = localStorage.getItem('hideUsers');
+
+            if (hideUsers !== null) {
+                this.hideUsers = JSON.parse(hideUsers);
+            }
+
             axios.get('/future_sprints')
                 .then(function (response) {
                     this.sprints = response.data.sprints;
@@ -60,6 +66,11 @@
                 });
         },
         methods: {
+            toggleUser: function (key) {
+                var newValue = !this.hideUsers[key];
+                Vue.set(this.hideUsers, key, newValue);
+                localStorage.setItem('hideUsers', JSON.stringify(this.hideUsers));
+            },
             getToggle: function (key) {
                 var toggled = this.toggle.hasOwnProperty(key) && this.toggle[key];
 

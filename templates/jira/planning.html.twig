@@ -16,13 +16,18 @@
             <th v-html="sprint.name" v-for="sprint in sprints"></th>
           </tr>
           </thead>
-          <tbody v-for="user in sortedUsers">
+          <tbody v-for="user in sortedUsers" v-if="!hideUsers.hasOwnProperty(user.key) || hideUsers[user.key] === false">
           <tr>
             <td>
               <strong v-html="user.displayName"></strong>
-              <a v-on:click="toggleKey(user.key)" class="toggle">
-                <span v-html="getToggle(user.key)"></span>
-              </a>
+              <div class="toggle">
+                <a v-on:click="toggleKey(user.key)">
+                  <span v-html="getToggle(user.key)"></span>
+                </a>
+                <a v-on:click="toggleUser(user.key)">
+                  <span><i class="fas fa-minus"></i></span>
+                </a>
+              </div>
             </td>
             <td></td>
             <td></td>
@@ -61,6 +66,14 @@
           </template>
           </tbody>
         </table>
+      </div>
+      <div>
+        <div><strong>{{ 'planning.ignored_users' | trans }}</strong></div>
+        <div v-for="user in sortedUsers" v-if="hideUsers.hasOwnProperty(user.key) && hideUsers[user.key] === true">
+          <a v-on:click="toggleUser(user.key)">
+            <span v-html="user.displayName"></span><i class="fas fa-plus"></i>
+          </a>
+        </div>
       </div>
     </div>
 

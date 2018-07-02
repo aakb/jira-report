@@ -2,6 +2,8 @@
 
 ## in develop
 
+* Added option to ignore user.
+
 ## 1.1.5
 
 * New collapse icon.
