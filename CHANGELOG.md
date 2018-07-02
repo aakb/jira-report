@@ -2,6 +2,13 @@
 
 ## in develop
 
+## 1.1.5
+
+* New collapse icon.
+* Added Project-sprint summary under user overview.
+* Added collapse in all levels.
+* Removed global spinner.
+
 ## 1.1.4
 
 * Fixed remaining estimate.
