@@ -6,6 +6,7 @@
 
 * Added option to ignore user.
 * Added sprint totals.
+* Added logged in test for /plaaning.
 
 ## 1.1.5
 
