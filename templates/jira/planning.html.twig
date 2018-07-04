@@ -66,6 +66,13 @@
             </tr>
           </template>
           </tbody>
+          <tbody>
+          <tr>
+            <td colspan="3">
+            </td>
+            <td v-html="getSprintRemainingTotal(sprint)" v-for="sprint in sprints"></td>
+          </tr>
+          </tbody>
         </table>
       </div>
       <div>

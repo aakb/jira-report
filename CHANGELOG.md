@@ -2,7 +2,10 @@
 
 ## in develop
 
+## 1.1.6
+
 * Added option to ignore user.
+* Added sprint totals.
 
 ## 1.1.5
 

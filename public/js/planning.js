@@ -87,6 +87,25 @@
             toggleKey: function (key) {
                 Vue.set(this.toggle, key, !this.toggle[key]);
             },
+            getSprintRemainingTotal: function (sprint) {
+                var total = 0;
+
+                for (var i in sprint.issues) {
+                    var issue = sprint.issues[i];
+
+                    if (issue.timeRemaining &&
+                        issue.fields.assignee &&
+                        (!this.hideUsers.hasOwnProperty(issue.fields.assignee.key) || this.hideUsers[issue.fields.assignee.key] === false)) {
+                        total += issue.timeRemaining;
+                    }
+                }
+
+                if (total === 0) {
+                    return '';
+                }
+
+                return total / 3600;
+            },
             getRemainingEstimatIssue: function (sprint, issue) {
                 if (sprint.hasOwnProperty('issuesById') && sprint.issuesById.hasOwnProperty(issue.id)) {
                     var sprintIssue = sprint.issuesById[issue.id];
