@@ -42,3 +42,17 @@ planning:
         headline: Planlægningsoversigt
         projects: Projektoversigt
         users: Brugeroversigt
+    ignored_users: Skjulte brugere
+    ignore_user: Skjul
+billing:
+    headline:
+        headline: Fakturering
+        select_project: Projekt
+        select_version: Version
+    table:
+        issue: Opgave
+        logged_hours: Registrerede timer
+        billed_hours: Fakturerbare timer
+        billing_done: Faktureret
+    value:
+        'true': Ja

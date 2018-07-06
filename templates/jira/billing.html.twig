@@ -1,0 +1,82 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+  ITK Faktureringsoversigter
+{% endblock %}
+
+{% block body %}
+  <div id="app">
+    <div class="container-fluid" style="max-width: 1400px; margin: 2em auto;">
+
+      <h1>{{ 'billing.headline.headline' | trans }}</h1>
+
+      <div class="planning-section">
+        <table class="table table-bordered">
+          <tr>
+            <td>
+              <strong>{{ 'billing.headline.select_project' | trans }}</strong>
+            </td>
+            <td>
+              <select v-model="selectedProject" @change="selectProject()" v-if="projects">
+                <option v-for="project in projects" v-bind:value="project" v-html="project.name">
+                </option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <strong>{{ 'billing.headline.select_version' | trans }}</strong>
+            </td>
+            <td>
+              <select v-model="selectedVersion" @change="selectVersion()" v-if="loadedProject">
+                <option v-for="version in loadedProject.versions" v-bind:value="version" v-html="version.name">
+                </option>
+              </select>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div class="planning-section">
+        <div v-if="!loadingIssues && issues">
+          <table class="table table-bordered">
+            <thead>
+            <th></th>
+            <th>{{ 'billing.table.issue' | trans }}</th>
+            <th>{{ 'billing.table.logged_hours' | trans }}</th>
+            <th>{{ 'billing.table.billed_hours' | trans }}</th>
+            <th>{{ 'billing.table.billing_done' | trans }}</th>
+            </thead>
+            <tbody>
+            <tr v-for="issue in sortedIssues">
+              <td>
+                <input type="checkbox" v-model="issue.selected">
+              </td>
+              <td v-html="issue.fields.summary"></td>
+              <td v-html="issue.fields.timetracking.timeSpentSeconds ? issue.fields.timetracking.timeSpentSeconds / 3600 : ''"></td>
+              <td v-html="issue.billingHours"></td>
+              <td>
+                <div v-if="issue.billingDone && issue.billingDone[0].value == 'Yes'">
+                  {{ 'billing.value.true' | trans }}
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <link rel="stylesheet" href="{{ asset('css/planning.css') }}">
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+
+  <script src="{{ asset('js/vue-2.5.16.min.js') }}"></script>
+  <script src="{{ asset('js/axios-0.18.0.min.js') }}"></script>
+  <script src="{{ asset('js/billing.js') }}"></script>
+{% endblock %}

@@ -8,6 +8,7 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Subscriber\Oauth\Oauth1;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -159,6 +160,93 @@ class JiraService
         }
 
         return $issues;
+    }
+
+    /**
+     * Get all issues for project and version.
+     *
+     * @return array
+     */
+    public function getIssuesForVersion($projectId, $versionId) {
+        $customFields = $this->get('/rest/api/2/field');
+
+        // Find customField definitions.
+        $customFieldBillingDone = array_search(
+            'Billing Done',
+            array_column($customFields, 'name')
+        );
+        if ($customFieldBillingDone == false) {
+            throw new HttpException(
+                500,
+                'Billing Done custom field does not exist'
+            );
+        }
+        $customFieldBillingDone = $customFields[$customFieldBillingDone];
+
+        $customFieldBillingHours = array_search(
+            'Billing Hours',
+            array_column($customFields, 'name')
+        );
+        if ($customFieldBillingHours == false) {
+            throw new HttpException(
+                500,
+                'Billing Hours custom field does not exist'
+            );
+        }
+        $customFieldBillingHours = $customFields[$customFieldBillingHours];
+
+        $boardId = getenv('JIRA_DEFAULT_BOARD');
+        $fields = implode(
+            ',',
+            [
+                'timetracking',
+                'summary',
+                'status',
+                'assignee',
+                'project',
+                'fixVersions',
+                $customFieldBillingDone->id,
+                $customFieldBillingHours->id
+            ]
+        );
+
+        $startAt = 0;
+        $issues = [];
+
+        while (true) {
+            $results = $this->get(implode('',[
+                    '/rest/agile/1.0/board/' . $boardId .'/issue',
+                    '?jql=fixVersion='.$versionId.
+                    '&project='.$projectId.
+                    '&maxResults=50'.
+                    '&startAt='.$startAt,
+                    '&fields='.$fields]
+                )
+            );
+            $issues = array_merge($issues, $results->issues);
+
+            $startAt = $startAt + 50;
+
+            if ($results->total < $startAt) {
+                break;
+            }
+        }
+
+        foreach ($issues as $issue) {
+            if (isset($issue->fields->{$customFieldBillingHours->id})) {
+                $issue->billingHours = $issue->fields->{$customFieldBillingHours->id};
+                unset($issue->fields->{$customFieldBillingHours->id});
+            }
+
+            if (isset($issue->fields->{$customFieldBillingDone->id})) {
+                $issue->billingDone = $issue->fields->{$customFieldBillingDone->id};
+                unset($issue->fields->{$customFieldBillingDone->id});
+            }
+        }
+
+        return [
+            'issues' => $issues,
+        ];
     }
 
     /**

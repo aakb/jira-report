@@ -117,6 +117,52 @@ class DefaultController extends Controller
     }
 
     /**
+     * @Route("/billing")
+     * @Method("GET")
+     */
+    public function getUnbilledIssues(JiraService $jira) {
+        return $this->render(
+            'jira/billing.html.twig'
+        );
+    }
+
+    /**
+     * @Route("/api/issues/{projectId}/{versionId}")
+     * @Method("GET")
+     */
+    public function getIssuesForVersion(JiraService $jira, $projectId, $versionId) {
+        return new JsonResponse($jira->getIssuesForVersion($projectId, $versionId));
+    }
+
+    /**
+     * @Route("/api/project")
+     * @Method("GET")
+     */
+    public function getProjects(JiraService $jira) {
+        $projects = $jira->get('/rest/api/2/project');
+
+        $activeProjects = [];
+
+        foreach ($projects as $project) {
+            if (!isset($project->projectCategory) || $project->projectCategory->name != 'Lukket') {
+                $activeProjects[] = $project;
+            }
+        }
+
+        return new JsonResponse(['projects' => $activeProjects]);
+    }
+
+    /**
+     * @Route("/api/project/{projectId}")
+     * @Method("GET")
+     */
+    public function getProject(JiraService $jira, $projectId) {
+        $project = $jira->get('/rest/api/2/project/'.$projectId);
+
+        return new JsonResponse(['project' => $project]);
+    }
+
+    /**
      * @Route("/")
      * @Method("GET")
      */
