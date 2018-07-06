@@ -12,12 +12,19 @@
             issues: null,
             version: null,
             epic: null,
-            loadingIssues: false
+            loadingIssues: false,
+            customers: null,
+            selectedCustomer: null
         },
         computed: {
             sortedIssues: function () {
                 return this.issues.sort(function (a,b) {
                     return (a.fields.summary.toLocaleLowerCase() > b.fields.summary.toLocaleLowerCase()) ? 1 : -1;
+                });
+            },
+            sortedCustomers: function () {
+                return this.customers.sort(function (a,b) {
+                    return (a.Title.toLocaleLowerCase() > b.Title.toLocaleLowerCase()) ? 1 : -1;
                 });
             }
         },
@@ -25,6 +32,13 @@
             axios.get('/api/project')
                 .then(function (response) {
                     this.projects = response.data.projects;
+                }.bind(this))
+                .catch(function (error) {
+                    console.log(error);
+                });
+            axios.get('/api/customer')
+                .then(function (response) {
+                    this.customers = response.data.customers;
                 }.bind(this))
                 .catch(function (error) {
                     console.log(error);

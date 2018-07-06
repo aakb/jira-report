@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Repository\CustomerRepository;
 use App\Service\JiraService;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -10,6 +11,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 class DefaultController extends Controller
 {
@@ -160,6 +164,16 @@ class DefaultController extends Controller
         $project = $jira->get('/rest/api/2/project/'.$projectId);
 
         return new JsonResponse(['project' => $project]);
+    }
+
+    /**
+     * @Route("/api/customer")
+     * @Method("GET")
+     */
+    public function getCustomers(CustomerRepository $customerRepository) {
+        $customers = $customerRepository->findAll();
+
+        return new JsonResponse(['customers' => $customers]);
     }
 
     /**

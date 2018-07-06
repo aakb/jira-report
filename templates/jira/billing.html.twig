@@ -34,6 +34,37 @@
               </select>
             </td>
           </tr>
+          <tr>
+            <td>
+              <strong>{{ 'billing.headline.select_customer' | trans }}</strong>
+            </td>
+            <td>
+              <select v-model="selectedCustomer" v-if="customers">
+                <option v-for="customer in sortedCustomers" v-bind:value="customer" v-html="customer.Title">
+                </option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>{{ 'billing.headline.price_per_hour' | trans }}</strong></td>
+            <td><span v-html="selectedCustomer ? selectedCustomer.PricePerHour : ''"></span></td>
+          </tr>
+          <tr>
+            <td><strong>{{ 'billing.headline.ean' | trans }}</strong></td>
+            <td><span v-html="selectedCustomer ? selectedCustomer.EAN : ''"></span></td>
+          </tr>
+          <tr>
+            <td><strong>{{ 'billing.headline.debitor' | trans }}</strong></td>
+            <td><span v-html="selectedCustomer ? selectedCustomer.Debitor : ''"></span></td>
+          </tr>
+          <tr>
+            <td><strong>{{ 'billing.headline.internal' | trans }}</strong></td>
+            <td><span v-html="selectedCustomer ? selectedCustomer.Internal : ''"></span></td>
+          </tr>
+          <tr>
+            <td><strong>{{ 'billing.headline.cvr' | trans }}</strong></td>
+            <td><span v-html="selectedCustomer ? selectedCustomer.CVR : ''"></span></td>
+          </tr>
         </table>
       </div>
       <div class="planning-section">
