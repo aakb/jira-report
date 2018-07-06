@@ -127,6 +127,29 @@ class JiraService
     }
 
     /**
+     * Get all epics for default board.
+     *
+     * @return array
+     */
+    public function getEpics($project) {
+        $epics = [];
+
+        $start = 0;
+        while (true) {
+            $result = $this->get('/rest/api/2/search?jql= project = '.$project.' AND issuetype = "Epic"&fields=summary&start='.$start);
+            $epics = array_merge($epics, $result->issues);
+
+            $start = $start + 50;
+
+            if ($start > $result->total) {
+                break;
+            }
+        }
+
+        return $epics;
+    }
+
+    /**
      * Get all issues for sprint.
      *
      * @param $sprintId

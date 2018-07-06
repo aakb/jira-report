@@ -1,0 +1,97 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+  ITK Opgaveopretter
+{% endblock %}
+
+{% block body %}
+  <div id="app">
+    <div class="container-fluid" style="max-width: 1400px; margin: 2em auto;">
+
+      <h1>{{ 'creator.headline.headline' | trans }}</h1>
+
+      <div class="planning-section">
+        <table class="table table-bordered">
+          <tr>
+            <td>
+              <strong>{{ 'creator.headline.select_project' | trans }}</strong>
+            </td>
+            <td>
+              <select v-model="selectedProject" @change="selectProject()" v-if="projects">
+                <option v-for="project in projects" v-bind:value="project" v-html="project.name">
+                </option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <strong>{{ 'creator.headline.select_version' | trans }}</strong>
+            </td>
+            <td>
+              <select v-model="selectedVersion" @change="selectVersion()" v-if="loadedProject">
+                <option v-for="version in loadedProject.versions" v-bind:value="version" v-html="version.name">
+                </option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <strong>{{ 'creator.headline.select_epic' | trans }}</strong>
+            </td>
+            <td>
+              <select v-model="selectedEpic" @change="selectEpic()" v-if="epics">
+                <option v-for="epic in epics" v-bind:value="epic" v-html="epic.fields.summary">
+                </option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <strong>{{ 'creator.headline.select_user' | trans }}</strong>
+            </td>
+            <td>
+              <select v-model="selectedUser" @change="selectUser()" v-if="users">
+                <option v-for="user in users" v-bind:value="user" v-html="user.displayName" v-if="user.displayName">
+                </option>
+              </select>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="planning-section">
+        <table class="table table-bordered">
+          <thead>
+          <tr>
+            <th>Opgavetitel</th>
+            <th>Estimat</th>
+          </tr>
+          </thead>
+          <tr>
+            <td>
+              <input type="text" v-model="issue.title">
+            </td>
+            <td>
+              <input type="number" v-model="issue.estimate">
+            </td>
+          </tr>
+        </table>
+
+        <button @click="createIssues()">Opret issues</button>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <link rel="stylesheet" href="{{ asset('css/planning.css') }}">
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+
+  <script src="{{ asset('js/vue-2.5.16.min.js') }}"></script>
+  <script src="{{ asset('js/axios-0.18.0.min.js') }}"></script>
+  <script src="{{ asset('js/creator.js') }}"></script>
+{% endblock %}
