@@ -88,6 +88,13 @@ class DefaultController extends Controller
     public function planningOverviewAction(JiraService $jira) {
         $jiraUrl = getenv('JIRA_URL');
 
+        // Get current user to make sure that the user is logged in.
+        try {
+            $jira->get('/rest/auth/1/session');
+        } catch (HttpException $e) {
+            return new RedirectResponse('/login');
+        }
+
         return $this->render(
             'jira/planning.html.twig',
             [

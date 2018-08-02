@@ -4,8 +4,8 @@
     var app = new Vue({
         el: '#app',
         data: {
-            toggle: {
-            },
+            hideUsers: {},
+            toggle: {},
             sprints: [],
             users: {},
             projects: {},
@@ -47,6 +47,12 @@
             }
         },
         created: function () {
+            var hideUsers = localStorage.getItem('hideUsers');
+
+            if (hideUsers !== null) {
+                this.hideUsers = JSON.parse(hideUsers);
+            }
+
             axios.get('/future_sprints')
                 .then(function (response) {
                     this.sprints = response.data.sprints;
@@ -60,6 +66,11 @@
                 });
         },
         methods: {
+            toggleUser: function (key) {
+                var newValue = !this.hideUsers[key];
+                Vue.set(this.hideUsers, key, newValue);
+                localStorage.setItem('hideUsers', JSON.stringify(this.hideUsers));
+            },
             getToggle: function (key) {
                 var toggled = this.toggle.hasOwnProperty(key) && this.toggle[key];
 
@@ -75,6 +86,25 @@
             },
             toggleKey: function (key) {
                 Vue.set(this.toggle, key, !this.toggle[key]);
+            },
+            getSprintRemainingTotal: function (sprint) {
+                var total = 0;
+
+                for (var i in sprint.issues) {
+                    var issue = sprint.issues[i];
+
+                    if (issue.timeRemaining &&
+                        issue.fields.assignee &&
+                        (!this.hideUsers.hasOwnProperty(issue.fields.assignee.key) || this.hideUsers[issue.fields.assignee.key] === false)) {
+                        total += issue.timeRemaining;
+                    }
+                }
+
+                if (total === 0) {
+                    return '';
+                }
+
+                return total / 3600;
             },
             getRemainingEstimatIssue: function (sprint, issue) {
                 if (sprint.hasOwnProperty('issuesById') && sprint.issuesById.hasOwnProperty(issue.id)) {
