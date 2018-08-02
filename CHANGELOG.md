@@ -2,6 +2,10 @@
 
 ## in develop
 
+## 1.1.6
+
+* Updated symfony.
+
 ## 1.1.5
 
 * New collapse icon.
