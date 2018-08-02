@@ -12,12 +12,12 @@
             selectedVersion: null,
             selectedEpic: null,
             selectedUser: null,
-            issues: null,
+            issues: [],
             version: null,
             epic: null,
             loadingIssues: false,
             issue: {
-                title: '',
+                name: '',
                 estimate: null
             },
             users: null
@@ -37,15 +37,24 @@
                 .catch(function (error) {
                     console.log(error);
                 });
+
+            axios.get('/api/user')
+                .then(function (response) {
+                    this.users = response.data.users;
+                }.bind(this))
+                .catch(function (error) {
+                    console.log(error);
+                });
         },
         methods: {
-            createIssues: function () {
-                axios.post('/api/issue', {
-                    project: this.selectedProject,
-                    version: this.selectedVersion,
-                    epic: this.selectedEpic,
-                    issue: this.issue
+            addIssue: function () {
+                this.issues.push({
+                    name: this.issue.name,
+                    estimate: this.issue.estimate
                 });
+            },
+            createIssues: function () {
+
             },
             selectProject: function () {
                 axios.get('/api/project/' + this.selectedProject.id)
@@ -59,14 +68,6 @@
                 axios.get('/api/project/' + this.selectedProject.id + '/epic')
                     .then(function (response) {
                         this.epics = response.data.epics;
-                    }.bind(this))
-                    .catch(function (error) {
-                        console.log(error);
-                    });
-
-                axios.get('/api/project/' + this.selectedProject.key + '/user')
-                    .then(function (response) {
-                        this.users = response.data.users;
                     }.bind(this))
                     .catch(function (error) {
                         console.log(error);

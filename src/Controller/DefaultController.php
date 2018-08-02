@@ -117,8 +117,6 @@ class DefaultController extends Controller
     }
 
     /**
-<<<<<<< Updated upstream
-=======
      * @Route("/billing")
      * @Method("GET")
      */
@@ -155,11 +153,11 @@ class DefaultController extends Controller
     }
 
     /**
-     * @Route("/api/project/{projectId}/user")
+     * @Route("/api/user")
      * @Method("GET")
      */
-    public function getUsers(JiraService $jira, $projectId) {
-        return new JsonResponse(['users' => $jira->get('/rest/api/2/user/search&projectKey='.$projectId.'&username=%')]);
+    public function getUsers(JiraService $jira) {
+        return new JsonResponse(['users' => $jira->get('/rest/api/2/group/member?groupname=administrators')->values]);
     }
 
     /**
@@ -191,7 +189,6 @@ class DefaultController extends Controller
     }
 
     /**
->>>>>>> Stashed changes
      * @Route("/")
      * @Method("GET")
      */

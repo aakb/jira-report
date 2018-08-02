@@ -69,10 +69,13 @@
           </thead>
           <tr>
             <td>
-              <input type="text" v-model="issue.title">
+              <input type="text" v-model="issue.name">
             </td>
             <td>
               <input type="number" v-model="issue.estimate">
+            </td>
+            <td>
+              <button @click="addIssue()">Tilføj</button>
             </td>
           </tr>
         </table>
