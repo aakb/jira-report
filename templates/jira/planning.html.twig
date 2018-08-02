@@ -16,15 +16,21 @@
             <th v-html="sprint.name" v-for="sprint in sprints"></th>
           </tr>
           </thead>
-          <tbody v-for="user in sortedUsers">
+          <tbody v-for="user in sortedUsers" v-if="!hideUsers.hasOwnProperty(user.key) || hideUsers[user.key] === false">
           <tr>
             <td>
               <strong v-html="user.displayName"></strong>
-              <a v-on:click="toggleKey(user.key)" class="toggle">
-                <span v-html="getToggle(user.key)"></span>
+              <div class="toggle">
+                <a v-on:click="toggleKey(user.key)">
+                  <span v-html="getToggle(user.key)"></span>
+                </a>
+              </div>
+            </td>
+            <td>
+              <a v-on:click="toggleUser(user.key)">
+                <span><i class="fas fa-eye-slash"></i></span>
               </a>
             </td>
-            <td></td>
             <td></td>
             <td v-bind:class="[
                   {'remaining-warning': getRemainingEstimatUser(user, sprint) > 28 && getRemainingEstimatUser(user, sprint) <= 30},
@@ -60,7 +66,22 @@
             </tr>
           </template>
           </tbody>
+          <tbody>
+          <tr>
+            <td colspan="3">
+            </td>
+            <td v-html="getSprintRemainingTotal(sprint)" v-for="sprint in sprints"></td>
+          </tr>
+          </tbody>
         </table>
+      </div>
+      <div>
+        <div><i class="fas fa-eye-slash"></i> <strong>{{ 'planning.ignored_users' | trans }}</strong></div>
+        <div v-for="user in sortedUsers" v-if="hideUsers.hasOwnProperty(user.key) && hideUsers[user.key] === true">
+          <a v-on:click="toggleUser(user.key)">
+            <span v-html="user.displayName"></span> <i class="fas fa-eye"></i>
+          </a>
+        </div>
       </div>
     </div>
 

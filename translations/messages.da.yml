@@ -42,3 +42,5 @@ planning:
         headline: Planlægningsoversigt
         projects: Projektoversigt
         users: Brugeroversigt
+    ignored_users: Skjulte brugere
+    ignore_user: Skjul

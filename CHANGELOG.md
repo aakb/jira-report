@@ -2,6 +2,12 @@
 
 ## in develop
 
+## 1.1.7
+
+* Added option to ignore user.
+* Added sprint totals.
+* Added logged in test for /plaaning.
+
 ## 1.1.6
 
 * Updated symfony.
