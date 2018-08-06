@@ -7,6 +7,13 @@
     <div class="planning-section">
       <h2>{{ 'planning.headline.users' | trans }}</h2>
 
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="basic-addon1">Filter</span>
+        </div>
+        <input type="text" class="form-control" placeholder="" aria-label="filter" aria-describedby="basic-addon1" v-model="userFilter">
+      </div>
+
       <div class="table-responsive">
         <table class="table table-bordered table-sm" id="table-projects">
           <thead>
@@ -87,6 +94,12 @@
 
     <div class="planning-section">
       <h2>{{ 'planning.headline.projects' | trans }}</h2>
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="basic-addon1">Filter</span>
+        </div>
+        <input type="text" class="form-control" placeholder="" aria-label="filter" aria-describedby="basic-addon1" v-model="projectFilter">
+      </div>
 
       <div class="table-responsive">
         <table class="table table-bordered table-sm" id="table-projects">
