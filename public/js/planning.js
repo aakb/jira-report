@@ -9,7 +9,9 @@
             sprints: [],
             users: {},
             projects: {},
-            numberLoaded: 0
+            numberLoaded: 0,
+            projectFilter: '',
+            userFilter: ''
         },
         computed: {
             sortedUsers: function () {
@@ -19,6 +21,10 @@
 
                 var arr = Object.keys(this.users).map(function (i) {
                     return this.users[i];
+                }.bind(this));
+
+                arr = arr.filter(function (item) {
+                    return item.displayName.toLowerCase().indexOf(this.userFilter) !== -1;
                 }.bind(this));
 
                 arr = arr.sort(function (a,b) {
@@ -37,6 +43,10 @@
 
                 var arr = Object.keys(this.projects).map(function (i) {
                     return this.projects[i];
+                }.bind(this));
+
+                arr = arr.filter(function (item) {
+                    return item.name.toLowerCase().indexOf(this.projectFilter) !== -1;
                 }.bind(this));
 
                 arr = arr.sort(function (a,b) {

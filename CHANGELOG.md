@@ -2,6 +2,10 @@
 
 ## in develop
 
+## 1.1.8
+
+* Added filters to computed lists.
+
 ## 1.1.7
 
 * Added option to ignore user.
