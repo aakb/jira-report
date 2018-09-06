@@ -12,6 +12,12 @@
   margin-bottom: 1em;
 }
 
+.remaining-critical {
+  color: white;
+  background-color: #880066;
+  font-weight: bold;
+}
+
 .remaining-warning {
   color: white;
   background-color: #ffc107;
