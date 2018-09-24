@@ -40,8 +40,9 @@
             </td>
             <td></td>
             <td v-bind:class="[
+                  {'remaining-critical': getRemainingEstimatUser(user, sprint) > 35},
                   {'remaining-warning': getRemainingEstimatUser(user, sprint) > 28 && getRemainingEstimatUser(user, sprint) <= 30},
-                  {'remaining-danger': getRemainingEstimatUser(user, sprint) > 30 },
+                  {'remaining-danger': getRemainingEstimatUser(user, sprint) > 30 && getRemainingEstimatUser(user, sprint) <= 35 },
                   {'remaining-success': getRemainingEstimatUser(user, sprint) >= 24 && getRemainingEstimatUser(user, sprint) <= 28 }
                   ]"
                 v-for="sprint in sprints">
