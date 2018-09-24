@@ -2,6 +2,10 @@
 
 ## in develop
 
+## 1.1.9
+
+* Added purple color for very critical amount of work in sprint.
+
 ## 1.1.8
 
 * Added filters to computed lists.
