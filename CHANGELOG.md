@@ -2,6 +2,10 @@
 
 ## in develop
 
+## 1.1.10
+
+* Added favicon.
+
 ## 1.1.9
 
 * Added purple color for very critical amount of work in sprint.
